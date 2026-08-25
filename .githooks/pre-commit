@@ -1,0 +1,3 @@
+#!/bin/sh
+# Made by loxqcx on Discord.
+node scripts/check-secrets.mjs

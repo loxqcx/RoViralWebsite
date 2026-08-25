@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "bot": "node bot/online.js",
     "bot:local": "node --env-file=.env.local bot/online.js",
+    "check:secrets": "node scripts/check-secrets.mjs",
     "qa": "node scripts/qa.mjs",
     "test": "vitest run"
   },

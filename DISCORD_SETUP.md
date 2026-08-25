@@ -61,7 +61,14 @@ When the worker starts, it also registers `/test`. Running the command makes the
 
 To copy the server ID, enable **Discord User Settings > Advanced > Developer Mode**, right-click the RoViral server icon, and choose **Copy Server ID**.
 
-For a local check, put the token in `.env.local` and run:
+For a local check, copy `.env.example` to `.env.local`, then edit `.env.local` only. Never place a real token in `.env.example`.
+
+```powershell
+Copy-Item .env.example .env.local
+notepad .env.local
+```
+
+Then run:
 
 ```bash
 npm run bot:local
@@ -72,3 +79,5 @@ Stop it with `Ctrl+C`. Use `npm run dev` in a second terminal for the website.
 ## Security
 
 Rotate any Discord webhook or bot token that has ever appeared in a public message, screenshot, repository commit, or deployment log. Update the secret on its host after rotation and redeploy or restart the related service.
+
+This repository includes a pre-commit secret check. Run `git config core.hooksPath .githooks` once after cloning so Git blocks commits containing a Discord bot token or live webhook.
