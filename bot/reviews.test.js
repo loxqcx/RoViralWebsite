@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { buildDeletedEmbed, buildModeratedEmbed, findReviewMessage, handleReviewReaction, markAllReviewsDeleted, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
+import { buildDeletedEmbed, buildModeratedEmbed, cleanupDuplicateDecisionReplies, findReviewMessage, handleReviewReaction, markAllReviewsDeleted, migrateLegacyReviewIds, sendDecisionReplyOnce, syncPendingReviewReactions } from './reviews.js';
 
 describe('review moderation', () => {
   const pending = {
@@ -27,6 +27,7 @@ describe('review moderation', () => {
     const message = {
       author: { id: 'bot-id' },
       embeds: [{ toJSON: () => pending }],
+      channel: { messages: { fetch: vi.fn().mockResolvedValue(new Map()) } },
       edit,
       reply,
     };
@@ -120,6 +121,7 @@ describe('review moderation', () => {
           ['decline', { emoji: { name: '\u274c' }, count: 1, me: true }],
         ]),
       },
+      channel: { messages: { fetch: vi.fn().mockResolvedValue(new Map()) } },
       edit,
       reply,
     };
@@ -159,5 +161,35 @@ describe('review moderation', () => {
     expect(firstEdit.mock.calls[0][0].embeds[0].footer.text).toContain('| review1');
     expect(secondEdit.mock.calls[0][0].embeds[0].footer.text).toContain('| review2');
     expect(firstEdit.mock.calls[0][0].embeds[0].fields).toContainEqual(expect.objectContaining({ name: 'Legacy Review ID', value: 'old-first' }));
+  });
+
+  it('keeps only one simultaneous decision confirmation', async () => {
+    const duplicateDelete = vi.fn();
+    const first = { id: '200', author: { id: 'bot-id' }, reference: { messageId: '100' }, content: 'Review approved', delete: vi.fn() };
+    const duplicate = { id: '300', author: { id: 'bot-id' }, reference: { messageId: '100' }, content: 'Review approved', delete: duplicateDelete };
+    const fetch = vi.fn()
+      .mockResolvedValueOnce(new Map())
+      .mockResolvedValueOnce(new Map([[first.id, first], [duplicate.id, duplicate]]));
+    const message = {
+      id: '100',
+      author: { id: 'bot-id' },
+      channel: { messages: { fetch } },
+      reply: vi.fn().mockResolvedValue(first),
+    };
+    await sendDecisionReplyOnce(message, 'Review approved', async () => {});
+    expect(message.reply).toHaveBeenCalledOnce();
+    expect(duplicateDelete).toHaveBeenCalledOnce();
+  });
+
+  it('cleans duplicate confirmations at startup', async () => {
+    const duplicateDelete = vi.fn();
+    const first = { id: '200', author: { id: 'bot-id' }, reference: { messageId: '100' }, content: 'Review declined', delete: vi.fn() };
+    const duplicate = { id: '300', author: { id: 'bot-id' }, reference: { messageId: '100' }, content: 'Review declined', delete: duplicateDelete };
+    const client = {
+      user: { id: 'bot-id' },
+      channels: { fetch: vi.fn().mockResolvedValue({ messages: { fetch: vi.fn().mockResolvedValue(new Map([[first.id, first], [duplicate.id, duplicate]])) } }) },
+    };
+    await expect(cleanupDuplicateDecisionReplies(client, 'channel-id')).resolves.toBe(1);
+    expect(duplicateDelete).toHaveBeenCalledOnce();
   });
 });

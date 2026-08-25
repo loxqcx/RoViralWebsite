@@ -1,8 +1,9 @@
 // Made by loxqcx on Discord.
 import { ActivityType, Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { handleCommand, registerCommands } from './commands.js';
-import { handleReviewReaction, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
+import { cleanupDuplicateDecisionReplies, handleReviewReaction, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
 import { reviewsConfig } from '../src/config/reviews.js';
+import { acquireProcessLock } from './process-lock.js';
 
 const token = process.env.DISCORD_BOT_TOKEN;
 const activity = process.env.DISCORD_BOT_ACTIVITY || 'RoViral Marketing';
@@ -12,6 +13,12 @@ const moderatorUserIds = (process.env.DISCORD_REVIEW_MODERATOR_IDS || '')
   .split(',')
   .map((id) => id.trim())
   .filter((id) => /^\d{17,20}$/.test(id));
+const releaseProcessLock = acquireProcessLock(new URL('../.bot.pid', import.meta.url));
+
+if (!releaseProcessLock) {
+  console.error('Another RoViral bot process is already running from this project.');
+  process.exit(1);
+}
 
 if (!token) {
   console.error('DISCORD_BOT_TOKEN is not configured.');
@@ -32,6 +39,8 @@ client.once(Events.ClientReady, async (readyClient) => {
     console.log(await registerCommands(readyClient, guildId));
     const migratedReviews = await migrateLegacyReviewIds(readyClient, reviewChannelId);
     if (migratedReviews) console.log(`Migrated ${migratedReviews} review ID(s).`);
+    const duplicateReplies = await cleanupDuplicateDecisionReplies(readyClient, reviewChannelId);
+    if (duplicateReplies) console.log(`Removed ${duplicateReplies} duplicate review confirmation(s).`);
     const repairedReviews = await syncPendingReviewReactions(readyClient, reviewChannelId);
     if (repairedReviews) console.log(`Checked reactions on ${repairedReviews} pending review(s).`);
   } catch (error) {
@@ -58,6 +67,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
 const shutdown = async () => {
   client.destroy();
+  releaseProcessLock();
   process.exit(0);
 };
 
@@ -66,5 +76,6 @@ process.once('SIGTERM', shutdown);
 
 client.login(token).catch((error) => {
   console.error('Discord bot login failed.', error);
+  releaseProcessLock();
   process.exit(1);
 });

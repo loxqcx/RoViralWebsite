@@ -5,6 +5,7 @@ import { reviewsConfig } from '../src/config/reviews.js';
 const decisionsInProgress = new Set();
 const REVIEW_ID_FIELD = 'Review ID';
 const LEGACY_REVIEW_ID_FIELD = 'Legacy Review ID';
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 export function buildModeratedEmbed(embed, state) {
   const marker = readReviewState(embed);
@@ -17,6 +18,46 @@ export function buildModeratedEmbed(embed, state) {
   };
 }
 
+const findDecisionReplies = async (message, content) => {
+  const messages = await message.channel.messages.fetch({ limit: 100, after: message.id });
+  return [...messages.values()]
+    .filter((candidate) => candidate.author?.id === message.author.id
+      && candidate.reference?.messageId === message.id
+      && candidate.content === content)
+    .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+};
+
+export async function sendDecisionReplyOnce(message, content, delay = wait) {
+  const existing = await findDecisionReplies(message, content);
+  if (existing.length) return existing[0];
+  const reply = await message.reply({ content, allowedMentions: { parse: [] } });
+  await delay(800);
+  const replies = await findDecisionReplies(message, content);
+  await Promise.allSettled(replies.slice(1).map((duplicate) => duplicate.delete()));
+  return reply;
+}
+
+export async function cleanupDuplicateDecisionReplies(client, channelId = reviewsConfig.moderation.channelId) {
+  const channel = await client.channels.fetch(channelId);
+  if (!channel?.messages) return 0;
+  const messages = [...(await channel.messages.fetch({ limit: 100 })).values()];
+  const confirmations = messages.filter((message) => message.author?.id === client.user.id
+    && message.reference?.messageId
+    && [reviewsConfig.moderation.approvedMessage, reviewsConfig.moderation.declinedMessage].includes(message.content));
+  const groups = new Map();
+  for (const confirmation of confirmations) {
+    const key = `${confirmation.reference.messageId}:${confirmation.content}`;
+    groups.set(key, [...(groups.get(key) || []), confirmation]);
+  }
+  let removed = 0;
+  for (const group of groups.values()) {
+    const sorted = group.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const results = await Promise.allSettled(sorted.slice(1).map((duplicate) => duplicate.delete()));
+    removed += results.filter((result) => result.status === 'fulfilled').length;
+  }
+  return removed;
+}
+
 async function applyReviewDecision(message, state, botUserId) {
   if (message.author?.id !== botUserId) return false;
   const original = message.embeds[0]?.toJSON?.() || message.embeds[0];
@@ -26,7 +67,7 @@ async function applyReviewDecision(message, state, botUserId) {
   const content = state === 'approved'
     ? reviewsConfig.moderation.approvedMessage
     : reviewsConfig.moderation.declinedMessage;
-  await message.reply({ content, allowedMentions: { parse: [] } });
+  await sendDecisionReplyOnce(message, content);
   return true;
 }
 
