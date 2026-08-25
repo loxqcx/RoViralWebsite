@@ -54,15 +54,15 @@ describe('Discord commands', () => {
     expect(create).toHaveBeenCalledWith(deleteAllReviewsCommand.toJSON());
   });
 
-  it('deletes an approved review by ID', async () => {
-    const remove = vi.fn();
+  it('marks an approved review deleted by ID', async () => {
+    const edit = vi.fn();
     const channel = {
       messages: {
         fetch: vi.fn().mockResolvedValue(new Map([['message-id', {
           id: 'message-id',
           author: { id: 'bot-id' },
-          embeds: [{ footer: { text: 'RoViral Review | approved | review-id' } }],
-          delete: remove,
+          embeds: [{ title: 'Approved review', color: 1, fields: [{ name: 'Review', value: 'Kept information' }], footer: { text: 'RoViral Review | approved | review-id' } }],
+          edit,
         }]])),
       },
     };
@@ -82,8 +82,13 @@ describe('Discord commands', () => {
     });
 
     expect(handled).toBe(true);
-    expect(remove).toHaveBeenCalledOnce();
-    expect(editReply).toHaveBeenCalledWith(expect.stringContaining('Review deleted'));
+    expect(edit.mock.calls[0][0].embeds[0]).toMatchObject({
+      title: 'Deleted',
+      color: 0xe05252,
+      fields: [{ name: 'Review', value: 'Kept information' }],
+      footer: { text: 'RoViral Review | deleted | review-id' },
+    });
+    expect(editReply).toHaveBeenCalledWith(expect.stringContaining('Review marked as deleted'));
   });
 
   it('deletes all review records', async () => {

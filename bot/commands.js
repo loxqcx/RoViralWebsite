@@ -1,7 +1,7 @@
 // Made by loxqcx on Discord.
 import { InteractionContextType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { reviewsConfig } from '../src/config/reviews.js';
-import { deleteReviewById, markAllReviewsDeleted } from './reviews.js';
+import { markAllReviewsDeleted, markReviewDeletedById } from './reviews.js';
 
 export const testCommand = new SlashCommandBuilder()
   .setName('test')
@@ -75,7 +75,7 @@ export async function handleCommand(interaction, options = {}) {
 
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   const reviewId = interaction.options.getString(deleteConfig.optionName, true);
-  const deleted = channel?.messages ? await deleteReviewById(channel, reviewId, interaction.client.user.id) : false;
+  const deleted = channel?.messages ? await markReviewDeletedById(channel, reviewId, interaction.client.user.id) : false;
   await interaction.editReply(deleted ? deleteConfig.successMessage : deleteConfig.notFoundMessage);
   return true;
 }

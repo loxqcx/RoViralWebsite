@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { buildModeratedEmbed, findReviewMessage, handleReviewReaction, markAllReviewsDeleted, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
+import { buildDeletedEmbed, buildModeratedEmbed, findReviewMessage, handleReviewReaction, markAllReviewsDeleted, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
 
 describe('review moderation', () => {
   const pending = {
@@ -64,10 +64,28 @@ describe('review moderation', () => {
     await expect(markAllReviewsDeleted(channel, 'bot-id')).resolves.toBe(1);
     expect(edit.mock.calls[0][0].embeds[0]).toMatchObject({
       title: 'Deleted',
-      description: 'This review has been deleted.',
+      fields: [{ name: 'Review ID', value: 'review3' }],
       footer: { text: 'RoViral Review | deleted | review3' },
     });
     expect(unrelatedEdit).not.toHaveBeenCalled();
+  });
+
+  it('preserves review information when changing the embed to deleted', () => {
+    const embed = {
+      title: 'Approved review',
+      description: 'Original description',
+      fields: [{ name: 'Review', value: 'Original review text' }, { name: 'Review ID', value: 'review4' }],
+      thumbnail: { url: 'https://example.com/avatar.png' },
+      footer: { text: 'RoViral Review | approved | review4' },
+    };
+    expect(buildDeletedEmbed(embed)).toMatchObject({
+      title: 'Deleted',
+      color: 0xe05252,
+      description: 'Original description',
+      fields: embed.fields,
+      thumbnail: embed.thumbnail,
+      footer: { text: 'RoViral Review | deleted | review4' },
+    });
   });
 
   it('restores both reactions on pending reviews at startup', async () => {
