@@ -38,7 +38,7 @@ client.once(Events.ClientReady, async (readyClient) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   try {
-    await handleCommand(interaction);
+    await handleCommand(interaction, { channelId: reviewChannelId, moderatorUserIds });
   } catch (error) {
     console.error('Could not respond to the Discord command.', error);
   }

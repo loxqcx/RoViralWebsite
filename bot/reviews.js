@@ -15,6 +15,36 @@ export function buildModeratedEmbed(embed, state) {
   };
 }
 
+export async function findReviewMessage(channel, reviewId, scanLimit = reviewsConfig.moderation.deleteCommand.scanLimit) {
+  const targetId = String(reviewId || '').trim().toLowerCase();
+  if (!targetId) return null;
+  let before;
+  let scanned = 0;
+
+  while (scanned < scanLimit) {
+    const batch = await channel.messages.fetch({ limit: Math.min(100, scanLimit - scanned), ...(before ? { before } : {}) });
+    const messages = [...batch.values()];
+    const match = messages.find((message) => {
+      const embed = message.embeds[0]?.toJSON?.() || message.embeds[0];
+      const marker = readReviewState(embed);
+      return marker?.state === 'approved' && marker.id.toLowerCase() === targetId;
+    });
+    if (match) return match;
+    if (messages.length < 100) return null;
+    scanned += messages.length;
+    before = messages.at(-1)?.id;
+  }
+
+  return null;
+}
+
+export async function deleteReviewById(channel, reviewId, botUserId) {
+  const message = await findReviewMessage(channel, reviewId);
+  if (!message || message.author?.id !== botUserId) return false;
+  await message.delete();
+  return true;
+}
+
 export async function handleReviewReaction(reaction, user, options = {}) {
   if (user.bot) return false;
   if (reaction.partial) await reaction.fetch();

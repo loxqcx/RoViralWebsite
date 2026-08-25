@@ -35,5 +35,15 @@ export const reviewsConfig = {
       approved: 0x20ef55,
       denied: 0xe05252,
     },
+    deleteCommand: {
+      name: 'deleter',
+      description: 'Delete an approved review from the website.',
+      optionName: 'id',
+      optionDescription: 'The review ID shown in the Discord embed footer.',
+      scanLimit: 500,
+      successMessage: 'Review deleted. It will disappear after the next website refresh.',
+      notFoundMessage: 'No approved review was found with that ID.',
+      deniedMessage: 'You do not have permission to delete reviews.',
+    },
   },
 };

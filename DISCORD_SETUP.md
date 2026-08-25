@@ -76,6 +76,8 @@ When the worker starts, it also registers `/test`. Running the command makes the
 
 When `DISCORD_REVIEW_MODERATOR_IDS` is empty, anyone who can access the private channel can decide. Set it to comma-separated staff Discord user IDs to restrict decisions further. A Discord user ID can retrieve a global public profile even if the reviewer is outside your server. A username can only be matched to a member in your server; otherwise the site uses the submitted username and a fallback avatar.
 
+Each review embed shows its review ID in the footer. Use `/deleter id:<review-id>` to delete an approved review. Discord requires slash-command names to be lowercase, so the requested `/DeleteR` command appears as `/deleter`. The command requires Manage Messages permission by default and confirms the deletion privately. The website removes the review on its next refresh.
+
 To copy the server ID, enable **Discord User Settings > Advanced > Developer Mode**, right-click the RoViral server icon, and choose **Copy Server ID**.
 
 For a local check, copy `.env.example` to `.env.local`, then edit `.env.local` only. Never place a real token in `.env.example`.

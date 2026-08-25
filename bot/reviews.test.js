@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { buildModeratedEmbed, handleReviewReaction } from './reviews.js';
+import { buildModeratedEmbed, findReviewMessage, handleReviewReaction } from './reviews.js';
 
 describe('review moderation', () => {
   const pending = {
@@ -45,5 +45,12 @@ describe('review moderation', () => {
     expect(handled).toBe(true);
     expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| denied |');
     expect(reply).toHaveBeenCalledWith({ content: 'Review denied', allowedMentions: { parse: [] } });
+  });
+
+  it('finds only approved reviews by their footer ID', async () => {
+    const approved = { id: 'approved-message', embeds: [{ footer: { text: 'RoViral Review | approved | target-id' } }] };
+    const pending = { id: 'pending-message', embeds: [{ footer: { text: 'RoViral Review | pending | other-id' } }] };
+    const channel = { messages: { fetch: vi.fn().mockResolvedValue(new Map([[pending.id, pending], [approved.id, approved]])) } };
+    await expect(findReviewMessage(channel, 'TARGET-ID')).resolves.toBe(approved);
   });
 });
