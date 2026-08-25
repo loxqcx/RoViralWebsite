@@ -2,6 +2,8 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fetchDiscordProfiles, parseDiscordUserIds } from './api/discord-users.js';
+import { createReview, listReviews } from './api/reviews.js';
+import { reviewsConfig } from './src/config/reviews.js';
 import { fetchPortfolioStats, parsePlaceIds } from './api/roblox-stats.js';
 
 const localRobloxStats = {
@@ -55,7 +57,43 @@ const localDiscordProfiles = (token) => ({
   },
 });
 
+const readRequestBody = (request) => new Promise((resolve, reject) => {
+  let body = '';
+  request.on('data', (chunk) => { body += chunk; });
+  request.on('end', () => {
+    try { resolve(JSON.parse(body || '{}')); } catch (error) { reject(error); }
+  });
+  request.on('error', reject);
+});
+
+const localReviews = (env) => ({
+  name: 'local-discord-reviews',
+  configureServer(server) {
+    server.middlewares.use('/api/reviews', async (request, response) => {
+      response.setHeader('Content-Type', 'application/json');
+      const reviewEnv = {
+        token: env.DISCORD_BOT_TOKEN,
+        guildId: env.DISCORD_GUILD_ID,
+        channelId: env.DISCORD_REVIEW_CHANNEL_ID || reviewsConfig.moderation.channelId,
+      };
+      try {
+        const result = request.method === 'GET'
+          ? await listReviews(reviewEnv)
+          : request.method === 'POST'
+            ? await createReview(await readRequestBody(request), reviewEnv)
+            : { status: 405, data: { error: 'Method not allowed.' } };
+        response.statusCode = result.status;
+        response.end(JSON.stringify(result.data));
+      } catch (error) {
+        console.error('Local reviews request failed.', error);
+        response.statusCode = 502;
+        response.end(JSON.stringify({ error: 'Reviews are temporarily unavailable.' }));
+      }
+    });
+  },
+});
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  return { plugins: [react(), localRobloxStats, localDiscordProfiles(env.DISCORD_BOT_TOKEN)] };
+  return { plugins: [react(), localRobloxStats, localDiscordProfiles(env.DISCORD_BOT_TOKEN), localReviews(env)] };
 });

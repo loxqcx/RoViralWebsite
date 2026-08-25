@@ -27,9 +27,9 @@ export default function SiteHeader() {
           <BrandMark />
           <nav className="desktop-nav" aria-label="Primary navigation">
             {primary.map((item) => (
-              <NavLink key={item.path} to={item.path} className={({ isActive }) => isActive ? 'active' : ''}>
-                {item.label}
-              </NavLink>
+              item.anchor
+                ? <Link key={item.path} to={item.path}>{item.label}</Link>
+                : <NavLink key={item.path} to={item.path} className={({ isActive }) => isActive ? 'active' : ''}>{item.label}</NavLink>
             ))}
           </nav>
           <div className="header-actions">
@@ -46,9 +46,9 @@ export default function SiteHeader() {
         <div className="mobile-menu">
           <nav aria-label="Mobile navigation">
             {[...primary, ...secondary].map((item, index) => (
-              <NavLink key={item.path} to={item.path} onClick={close}>
+              <Link key={item.path} to={item.path} onClick={close}>
                 <span>{String(index + 1).padStart(2, '0')}</span>{item.label}
-              </NavLink>
+              </Link>
             ))}
           </nav>
           <div className="mobile-menu-footer">

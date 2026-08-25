@@ -15,11 +15,15 @@ import ContactPage from './pages/ContactPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 function ScrollManager() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
+    if (hash) {
+      window.requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      return;
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [pathname]);
+  }, [pathname, hash]);
 
   return null;
 }

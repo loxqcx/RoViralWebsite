@@ -2,6 +2,7 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PackageCard from '../components/PackageCard';
+import ReviewsSection from '../components/ReviewsSection';
 import SectionHeading from '../components/SectionHeading';
 import ServiceLogo from '../components/ServiceLogo';
 import { homePageConfig } from '../config/home';
@@ -24,6 +25,7 @@ export default function HomePage() {
             <div className="button-row">
               <Link className="button button--lime" to={homePageConfig.hero.primaryCta.path}>{homePageConfig.hero.primaryCta.label}<ArrowUpRight size={18} /></Link>
               <Link className="text-link" to={homePageConfig.hero.secondaryCta.path}>{homePageConfig.hero.secondaryCta.label}<ArrowRight size={18} /></Link>
+              <Link className="text-link" to={homePageConfig.hero.reviewsCta.path}>{homePageConfig.hero.reviewsCta.label}<ArrowRight size={18} /></Link>
             </div>
           </div>
         </div>
@@ -58,28 +60,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="process-section section-pad">
-        <div className="container">
-          <SectionHeading eyebrow={homePageConfig.processSection.eyebrow} title={homePageConfig.processSection.title} />
-          <div className="process-grid">
-            {homePageConfig.processSection.items.map((item) => (
-              <article key={item.step}>
-                <span>{item.step}</span>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="home-cta">
-        <div className="container home-cta-inner">
-          <p className="eyebrow">{homePageConfig.cta.eyebrow}</p>
-          <h2>{homePageConfig.cta.titleLines[0]}<br /><em>{homePageConfig.cta.titleLines[1]}</em></h2>
-          <Link className="button button--dark" to={homePageConfig.cta.buttonPath}>{homePageConfig.cta.buttonLabel} <ArrowUpRight size={18} /></Link>
-        </div>
-      </section>
+      <ReviewsSection />
     </>
   );
 }

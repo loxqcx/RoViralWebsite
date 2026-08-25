@@ -1,6 +1,6 @@
 # RoViral Marketing Site
 
-A configurable React/Vite marketing site with live Roblox portfolio data, Discord-backed team profiles, and Vercel serverless contact delivery to Discord.
+A configurable React/Vite marketing site with live Roblox portfolio data, Discord-backed team profiles and reviews, and Vercel serverless delivery to Discord.
 
 ## Local setup
 
@@ -19,6 +19,7 @@ Vite serves the frontend and local API middleware. Copy `.env.example` to `.env.
 - Add `DISCORD_WEBHOOK_URL` in Vercel Project Settings > Environment Variables.
 - Optionally set `DISCORD_MENTION_IDS` as comma-separated Discord IDs.
 - Add `DISCORD_BOT_TOKEN` to load Discord usernames and avatars on the team page.
+- Add `DISCORD_REVIEW_CHANNEL_ID` to send and load moderated reviews. The configured default is the RoViral review channel.
 
 Real webhook URLs and bot tokens must never be added to source control or client-side code.
 

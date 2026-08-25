@@ -1,5 +1,6 @@
 // Made by loxqcx on Discord.
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 const stagedFilesResult = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z'], {
   encoding: 'utf8',
@@ -8,15 +9,22 @@ const stagedFilesResult = spawnSync('git', ['diff', '--cached', '--name-only', '
 if (stagedFilesResult.status !== 0) process.exit(stagedFilesResult.status || 1);
 
 const stagedFiles = stagedFilesResult.stdout.split('\0').filter(Boolean);
+const trackedFilesResult = spawnSync('git', ['ls-files', '-z'], { encoding: 'utf8' });
+if (trackedFilesResult.status !== 0) process.exit(trackedFilesResult.status || 1);
+const trackedFiles = trackedFilesResult.stdout.split('\0').filter(Boolean);
+const filesToCheck = [...new Set([...trackedFiles, ...stagedFiles])];
 const secretPatterns = [
   /^\s*DISCORD_BOT_TOKEN\s*=\s*(?!your_|replace_|<)[^\s]+/im,
   /discord\.com\/api\/webhooks\/\d{10,}\/[A-Za-z0-9_-]{20,}/i,
 ];
 const unsafeFiles = [];
 
-for (const file of stagedFiles) {
-  const stagedContent = spawnSync('git', ['show', `:${file}`], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
-  if (stagedContent.status === 0 && secretPatterns.some((pattern) => pattern.test(stagedContent.stdout))) {
+for (const file of filesToCheck) {
+  const isStaged = stagedFiles.includes(file);
+  const content = isStaged
+    ? spawnSync('git', ['show', `:${file}`], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 }).stdout
+    : (() => { try { return readFileSync(file, 'utf8'); } catch { return ''; } })();
+  if (secretPatterns.some((pattern) => pattern.test(content))) {
     unsafeFiles.push(file);
   }
 }

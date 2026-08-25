@@ -3,7 +3,8 @@
 This folder is the main customization surface for the website.
 
 - `brand.js`: brand name, logo, hero image, Discord link, announcement, and footer copy.
-- `home.js`: homepage hero, section headings, process steps, and final call to action.
+- `home.js`: homepage hero, service/package headings, and homepage calls to action.
+- `reviews.js`: homepage review copy, form labels, marquee speed, moderation channel, reactions, and embed colors.
 - `services.js`: Services page hero, service logo paths, descriptions, and deliverables. Service images live in `public/assets`.
 - `packages.js`: Packages page hero, package cards, labels, pricing, inclusions, and note.
 - `portfolio.js`: live Portfolio page headings, status text, and stat labels.
@@ -20,4 +21,4 @@ This folder is the main customization surface for the website.
 - `server.js`: Discord mention IDs and public embed presentation settings. Never put the webhook URL here.
 - `theme.css`: global brand colors.
 
-The Discord webhook URL must remain in the server-side `DISCORD_WEBHOOK_URL` environment variable.
+Discord webhook URLs and bot tokens must remain in server-side environment variables. Never add them to a config file.

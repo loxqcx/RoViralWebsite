@@ -3,6 +3,7 @@ export const navigationConfig = [
   { label: 'Home', path: '/' },
   { label: 'Services', path: '/services' },
   { label: 'Work', path: '/portfolio' },
+  { label: 'Reviews', path: '/#reviews', anchor: true },
   { label: 'Packages', path: '/packages' },
   { label: 'About', path: '/about' },
   { label: 'Case studies', path: '/case-studies' },

@@ -67,16 +67,70 @@ for (const viewport of [
   }));
   await page.screenshot({ path: path.join(outputDir, `home-packages-${viewport.name}.png`), fullPage: false });
 
+  await visit(page, '/#reviews');
+  await page.waitForTimeout(900);
+  await page.getByRole('button', { name: 'Leave a review' }).click();
+  await page.locator('.review-form').waitFor({ state: 'visible' });
+  const reviews = await page.evaluate(() => {
+    const section = document.querySelector('#reviews');
+    const rect = section?.getBoundingClientRect();
+    return {
+      sectionVisible: Boolean(section),
+      anchorPosition: rect?.top ?? null,
+      cards: document.querySelectorAll('.review-card').length,
+      emptyVisible: Boolean(document.querySelector('.reviews-empty')),
+      formFields: document.querySelectorAll('.review-form [name="discord"], .review-form [name="name"], .review-form [name="message"], .review-form [name="stars"]').length,
+      reviewNavHref: [...document.querySelectorAll('.desktop-nav a')].find((link) => link.textContent.trim() === 'Reviews')?.getAttribute('href'),
+      oldProcessPresent: Boolean(document.querySelector('.process-section')),
+      oldCtaPresent: Boolean(document.querySelector('.home-cta')),
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  await page.screenshot({ path: path.join(outputDir, `reviews-${viewport.name}.png`), fullPage: false });
+
+  const reviewApiUrl = `${baseUrl}/api/reviews`;
+  await page.route(reviewApiUrl, (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      reviews: [
+        { id: 'qa-1', username: 'playerone', displayName: 'Player One', message: 'RoViral gave our launch a much stronger content direction and kept the process moving.', stars: 5, avatarUrl: '' },
+        { id: 'qa-2', username: 'buildertwo', displayName: 'Builder Two', message: 'The team was responsive, organized, and easy to work with from start to finish.', stars: 4, avatarUrl: '' },
+      ],
+    }),
+  }));
+  await visit(page, '/?qa=review-marquee#reviews');
+  await page.locator('.review-card').first().waitFor({ state: 'visible' });
+  await page.locator('#reviews').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+  const reviewMarquee = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.review-card').length,
+    groups: document.querySelectorAll('.reviews-group').length,
+    animationName: getComputedStyle(document.querySelector('.reviews-track')).animationName,
+    filledStars: document.querySelectorAll('.review-rating svg[fill="currentColor"]').length,
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
+  await page.screenshot({ path: path.join(outputDir, `reviews-marquee-${viewport.name}.png`), fullPage: false });
+  await page.unroute(reviewApiUrl);
+
   await visit(page, '/packages');
   const packages = await page.locator('.package-card').count();
   const packageActions = await page.locator('.package-card .button').evaluateAll((links) => links.map((link) => ({ href: link.href, text: link.textContent.trim() })));
   const packageCards = page.locator('.package-card');
   const packageCard = packageCards.first();
-  const cardScaleBefore = await packageCard.evaluate((element) => getComputedStyle(element).scale);
+  const cardRectBefore = await packageCard.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, x: rect.x, y: rect.y };
+  });
   await packageCard.hover();
   await page.waitForTimeout(350);
-  const cardScaleAfter = await packageCard.evaluate((element) => getComputedStyle(element).scale);
-  const packageCardHoverCorrect = viewport.name === 'desktop' ? cardScaleAfter !== cardScaleBefore : cardScaleAfter === cardScaleBefore;
+  const cardRectAfter = await packageCard.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, x: rect.x, y: rect.y };
+  });
+  const packageCardHoverCorrect = viewport.name === 'desktop'
+    ? cardRectAfter.width > cardRectBefore.width && cardRectAfter.y < cardRectBefore.y
+    : Math.abs(cardRectAfter.width - cardRectBefore.width) < 0.5 && Math.abs(cardRectAfter.height - cardRectBefore.height) < 0.5;
   await page.screenshot({ path: path.join(outputDir, `packages-${viewport.name}.png`), fullPage: false });
 
   await visit(page, '/services');
@@ -158,9 +212,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, homeServices, homePackages, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, homeServices, homePackages, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, errors });
   }
 
   await page.close();
@@ -182,6 +236,21 @@ if (report.some((item) => item.errors.length
   || item.homePackages.cards !== packagesPageConfig.packages.length
   || item.homePackages.actions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
   || item.homePackages.horizontalOverflow
+  || !item.reviews.sectionVisible
+  || item.reviews.anchorPosition === null
+  || item.reviews.anchorPosition < 0
+  || item.reviews.anchorPosition > 160
+  || (!item.reviews.cards && !item.reviews.emptyVisible)
+  || item.reviews.formFields !== 4
+  || item.reviews.reviewNavHref !== '/#reviews'
+  || item.reviews.oldProcessPresent
+  || item.reviews.oldCtaPresent
+  || item.reviews.horizontalOverflow
+  || item.reviewMarquee.cards !== 8
+  || item.reviewMarquee.groups !== 2
+  || item.reviewMarquee.animationName !== 'review-marquee'
+  || item.reviewMarquee.filledStars !== 36
+  || item.reviewMarquee.horizontalOverflow
   || item.packages !== 3
   || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
   || !item.packageCardHoverCorrect
