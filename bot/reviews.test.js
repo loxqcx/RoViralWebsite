@@ -73,4 +73,32 @@ describe('review moderation', () => {
     expect(react).toHaveBeenNthCalledWith(1, '\u2705');
     expect(react).toHaveBeenNthCalledWith(2, '\u274c');
   });
+
+  it('recovers an approval reaction made while the bot was offline', async () => {
+    const edit = vi.fn();
+    const reply = vi.fn();
+    const pendingMessage = {
+      author: { id: 'bot-id' },
+      embeds: [{ footer: { text: 'RoViral Review | pending | offline-id' } }],
+      reactions: {
+        cache: new Map([
+          ['approve', { emoji: { name: '\u2705' }, count: 2, me: true }],
+          ['decline', { emoji: { name: '\u274c' }, count: 1, me: true }],
+        ]),
+      },
+      edit,
+      reply,
+    };
+    const client = {
+      user: { id: 'bot-id' },
+      channels: {
+        fetch: vi.fn().mockResolvedValue({
+          messages: { fetch: vi.fn().mockResolvedValue(new Map([['message-id', pendingMessage]])) },
+        }),
+      },
+    };
+    await syncPendingReviewReactions(client, 'channel-id');
+    expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| approved |');
+    expect(reply).toHaveBeenCalledWith({ content: 'Review approved', allowedMentions: { parse: [] } });
+  });
 });
