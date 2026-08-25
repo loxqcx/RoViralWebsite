@@ -22,6 +22,10 @@ describe('review submissions', () => {
     );
     expect(payload.allowed_mentions).toEqual({ parse: [] });
     expect(readReviewState(payload.embeds[0])).toEqual({ state: 'pending', id: 'review-id' });
+    expect(payload.embeds[0].fields).toEqual(expect.arrayContaining([
+      expect.objectContaining({ name: 'Review ID', value: 'review-id' }),
+      expect.objectContaining({ name: 'Moderation', value: expect.stringContaining('\u274c') }),
+    ]));
   });
 
   it('only exposes approved embeds', () => {

@@ -5,13 +5,14 @@ import { reviewsConfig } from '../src/config/reviews.js';
 
 const API_ROOT = 'https://discord.com/api/v10';
 const escapedFooterPrefix = reviewsConfig.moderation.footerPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const FOOTER_PATTERN = new RegExp(`^${escapedFooterPrefix} \\| (pending|approved|denied) \\| ([a-z0-9_-]+)$`, 'i');
+const FOOTER_PATTERN = new RegExp(`^${escapedFooterPrefix} \\| (pending|approved|denied|declined) \\| ([a-z0-9_-]+)$`, 'i');
 const FIELD_NAMES = {
   identity: 'Discord',
   userId: 'Discord User ID',
   displayName: 'Display Name',
   rating: 'Rating',
   review: 'Review',
+  reviewId: 'Review ID',
 };
 
 const clean = (value, limit) => String(value ?? '').trim().slice(0, limit);
@@ -89,6 +90,8 @@ export function buildReviewPayload(data, profile, reviewId = randomUUID()) {
       field(FIELD_NAMES.displayName, publicName, true),
       field(FIELD_NAMES.rating, `${data.stars}/5`, true),
       field(FIELD_NAMES.review, data.message),
+      field(FIELD_NAMES.reviewId, reviewId),
+      field('Moderation', `React with ${reviewsConfig.moderation.approvalEmoji} to approve or ${reviewsConfig.moderation.denialEmoji} to decline.`),
     ],
     footer: { text: `${reviewsConfig.moderation.footerPrefix} | pending | ${reviewId}` },
     timestamp: new Date().toISOString(),
@@ -146,10 +149,21 @@ export async function createReview(body, env, fetchImpl = fetch) {
   const message = await posted.json();
 
   for (const emoji of [reviewsConfig.moderation.approvalEmoji, reviewsConfig.moderation.denialEmoji]) {
-    const reaction = await discordRequest(`/channels/${env.channelId}/messages/${message.id}/reactions/${encodeURIComponent(emoji)}/@me`, env.token, {
-      method: 'PUT',
-    }, fetchImpl);
-    if (!reaction.ok) console.error(`Could not add the ${emoji} review reaction.`);
+    let added = false;
+    for (let attempt = 0; attempt < 3 && !added; attempt += 1) {
+      const reaction = await discordRequest(`/channels/${env.channelId}/messages/${message.id}/reactions/${encodeURIComponent(emoji)}/@me`, env.token, {
+        method: 'PUT',
+      }, fetchImpl);
+      if (reaction.ok) {
+        added = true;
+      } else if (reaction.status === 429) {
+        const rateLimit = await reaction.json().catch(() => ({}));
+        await new Promise((resolve) => setTimeout(resolve, Math.min(Number(rateLimit.retry_after || 1) * 1000, 3000)));
+      } else {
+        break;
+      }
+    }
+    if (!added) console.error(`Could not add the ${emoji} review reaction.`);
   }
 
   return { status: 200, data: { ok: true, message: 'Review sent' } };
@@ -185,7 +199,7 @@ export default async function handler(request, response) {
       response.setHeader('Allow', 'GET, POST');
       return response.status(405).json({ error: 'Method not allowed.' });
     }
-    if (request.method === 'GET') response.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    if (request.method === 'GET') response.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=10');
     return response.status(result.status).json(result.data);
   } catch (error) {
     console.error('Discord reviews request failed.', error);

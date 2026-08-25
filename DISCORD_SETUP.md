@@ -70,13 +70,14 @@ When the worker starts, it also registers `/test`. Running the command makes the
 
 ## Moderate Reviews
 
-1. A submission appears in channel `1541656718214307860` with check and cross reactions.
-2. React with the check to publish it on the homepage, or the cross to deny it. The first decision is final for that submission.
-3. A denied submission receives the bot reply `Review denied`.
+1. A submission appears in channel `1541656718214307860` with check and cross reactions and an explicit Review ID field.
+2. React with the check to publish it on the homepage, or the cross to decline it. The first decision is final for that submission.
+3. The bot replies `Review approved` or `Review declined` after it records the decision.
+4. Approved reviews appear after the website's next automatic refresh, normally within 10 to 20 seconds.
 
 When `DISCORD_REVIEW_MODERATOR_IDS` is empty, anyone who can access the private channel can decide. Set it to comma-separated staff Discord user IDs to restrict decisions further. A Discord user ID can retrieve a global public profile even if the reviewer is outside your server. A username can only be matched to a member in your server; otherwise the site uses the submitted username and a fallback avatar.
 
-Each review embed shows its review ID in the footer. Use `/deleter id:<review-id>` to delete an approved review. Discord requires slash-command names to be lowercase, so the requested `/DeleteR` command appears as `/deleter`. The command requires Manage Messages permission by default and confirms the deletion privately. The website removes the review on its next refresh.
+Each review embed shows its review ID in the footer. Use `/deleter id:<review-id>` to delete an approved review. Discord requires slash-command names to be lowercase, so the requested `/DeleteR` command appears as `/deleter`. The command confirms the deletion privately and permits configured moderators, members with Manage Messages, or staff who can access the private review channel. The website removes the review on its next refresh.
 
 To copy the server ID, enable **Discord User Settings > Advanced > Developer Mode**, right-click the RoViral server icon, and choose **Copy Server ID**.
 

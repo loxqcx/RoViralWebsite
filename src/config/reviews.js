@@ -6,7 +6,7 @@ export const reviewsConfig = {
   body: 'Feedback from the developers and teams we have worked alongside.',
   emptyMessage: 'Approved client reviews will appear here.',
   marqueeDurationSeconds: 46,
-  refreshMs: 60_000,
+  refreshMs: 10_000,
   form: {
     openLabel: 'Leave a review',
     closeLabel: 'Close form',
@@ -34,7 +34,10 @@ export const reviewsConfig = {
       pending: 0xf0c94c,
       approved: 0x20ef55,
       denied: 0xe05252,
+      declined: 0xe05252,
     },
+    approvedMessage: 'Review approved',
+    declinedMessage: 'Review declined',
     deleteCommand: {
       name: 'deleter',
       description: 'Delete an approved review from the website.',

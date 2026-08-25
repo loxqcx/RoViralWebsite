@@ -6,13 +6,29 @@ const decisionsInProgress = new Set();
 
 export function buildModeratedEmbed(embed, state) {
   const marker = readReviewState(embed);
-  if (!marker || marker.state !== 'pending' || !['approved', 'denied'].includes(state)) return null;
+  if (!marker || marker.state !== 'pending' || !['approved', 'declined'].includes(state)) return null;
   return {
     ...embed,
-    title: state === 'approved' ? 'Approved review' : 'Denied review',
+    title: state === 'approved' ? 'Approved review' : 'Declined review',
     color: reviewsConfig.moderation.colors[state],
     footer: { text: `${reviewsConfig.moderation.footerPrefix} | ${state} | ${marker.id}` },
   };
+}
+
+export async function syncPendingReviewReactions(client, channelId = reviewsConfig.moderation.channelId) {
+  const channel = await client.channels.fetch(channelId);
+  if (!channel?.messages) return 0;
+  const messages = await channel.messages.fetch({ limit: 100 });
+  const pending = [...messages.values()].filter((message) => {
+    if (message.author?.id !== client.user.id) return false;
+    const embed = message.embeds[0]?.toJSON?.() || message.embeds[0];
+    return readReviewState(embed)?.state === 'pending';
+  });
+  for (const message of pending) {
+    await message.react(reviewsConfig.moderation.approvalEmoji);
+    await message.react(reviewsConfig.moderation.denialEmoji);
+  }
+  return pending.length;
 }
 
 export async function findReviewMessage(channel, reviewId, scanLimit = reviewsConfig.moderation.deleteCommand.scanLimit) {
@@ -51,14 +67,12 @@ export async function handleReviewReaction(reaction, user, options = {}) {
   if (reaction.message.partial) await reaction.message.fetch();
 
   const channelId = options.channelId || reviewsConfig.moderation.channelId;
-  const moderators = options.moderatorUserIds || reviewsConfig.moderation.moderatorUserIds;
   if (reaction.message.channelId !== channelId) return false;
-  if (moderators.length && !moderators.includes(user.id)) return false;
 
   const state = reaction.emoji.name === reviewsConfig.moderation.approvalEmoji
     ? 'approved'
     : reaction.emoji.name === reviewsConfig.moderation.denialEmoji
-      ? 'denied'
+      ? 'declined'
       : null;
   if (!state || decisionsInProgress.has(reaction.message.id)) return false;
 
@@ -70,9 +84,10 @@ export async function handleReviewReaction(reaction, user, options = {}) {
     const updated = buildModeratedEmbed(original, state);
     if (!updated) return false;
     await message.edit({ embeds: [updated] });
-    if (state === 'denied') {
-      await message.reply({ content: 'Review denied', allowedMentions: { parse: [] } });
-    }
+    const content = state === 'approved'
+      ? reviewsConfig.moderation.approvedMessage
+      : reviewsConfig.moderation.declinedMessage;
+    await message.reply({ content, allowedMentions: { parse: [] } });
     return true;
   } finally {
     decisionsInProgress.delete(reaction.message.id);

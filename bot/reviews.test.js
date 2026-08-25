@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { buildModeratedEmbed, findReviewMessage, handleReviewReaction } from './reviews.js';
+import { buildModeratedEmbed, findReviewMessage, handleReviewReaction, syncPendingReviewReactions } from './reviews.js';
 
 describe('review moderation', () => {
   const pending = {
@@ -21,7 +21,7 @@ describe('review moderation', () => {
     expect(buildModeratedEmbed(completed, 'approved')).toBeNull();
   });
 
-  it('locks in a denial and replies to the request', async () => {
+  it('locks in a decline and replies to the request', async () => {
     const edit = vi.fn();
     const reply = vi.fn();
     const message = {
@@ -43,8 +43,8 @@ describe('review moderation', () => {
     };
     const handled = await handleReviewReaction(reaction, { id: 'staff-id', bot: false }, { channelId: '123456789012345678' });
     expect(handled).toBe(true);
-    expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| denied |');
-    expect(reply).toHaveBeenCalledWith({ content: 'Review denied', allowedMentions: { parse: [] } });
+    expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| declined |');
+    expect(reply).toHaveBeenCalledWith({ content: 'Review declined', allowedMentions: { parse: [] } });
   });
 
   it('finds only approved reviews by their footer ID', async () => {
@@ -52,5 +52,25 @@ describe('review moderation', () => {
     const pending = { id: 'pending-message', embeds: [{ footer: { text: 'RoViral Review | pending | other-id' } }] };
     const channel = { messages: { fetch: vi.fn().mockResolvedValue(new Map([[pending.id, pending], [approved.id, approved]])) } };
     await expect(findReviewMessage(channel, 'TARGET-ID')).resolves.toBe(approved);
+  });
+
+  it('restores both reactions on pending reviews at startup', async () => {
+    const react = vi.fn();
+    const pendingMessage = {
+      author: { id: 'bot-id' },
+      embeds: [{ footer: { text: 'RoViral Review | pending | pending-id' } }],
+      react,
+    };
+    const client = {
+      user: { id: 'bot-id' },
+      channels: {
+        fetch: vi.fn().mockResolvedValue({
+          messages: { fetch: vi.fn().mockResolvedValue(new Map([['message-id', pendingMessage]])) },
+        }),
+      },
+    };
+    await expect(syncPendingReviewReactions(client, 'channel-id')).resolves.toBe(1);
+    expect(react).toHaveBeenNthCalledWith(1, '\u2705');
+    expect(react).toHaveBeenNthCalledWith(2, '\u274c');
   });
 });

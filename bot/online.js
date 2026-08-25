@@ -1,7 +1,7 @@
 // Made by loxqcx on Discord.
 import { ActivityType, Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { handleCommand, registerCommands } from './commands.js';
-import { handleReviewReaction } from './reviews.js';
+import { handleReviewReaction, syncPendingReviewReactions } from './reviews.js';
 import { reviewsConfig } from '../src/config/reviews.js';
 
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -30,8 +30,10 @@ client.once(Events.ClientReady, async (readyClient) => {
   });
   try {
     console.log(await registerCommands(readyClient, guildId));
+    const repairedReviews = await syncPendingReviewReactions(readyClient, reviewChannelId);
+    if (repairedReviews) console.log(`Checked reactions on ${repairedReviews} pending review(s).`);
   } catch (error) {
-    console.error('Could not register Discord commands.', error);
+    console.error('Could not finish Discord startup tasks.', error);
   }
   console.log(`${readyClient.user.tag} is online.`);
 });

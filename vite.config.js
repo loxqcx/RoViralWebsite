@@ -83,6 +83,7 @@ const localReviews = (env) => ({
             ? await createReview(await readRequestBody(request), reviewEnv)
             : { status: 405, data: { error: 'Method not allowed.' } };
         response.statusCode = result.status;
+        if (request.method === 'GET') response.setHeader('Cache-Control', 'no-store');
         response.end(JSON.stringify(result.data));
       } catch (error) {
         console.error('Local reviews request failed.', error);
