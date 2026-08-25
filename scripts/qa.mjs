@@ -7,6 +7,7 @@ import { gamesConfig } from '../src/config/games.js';
 import { navigationConfig } from '../src/config/navigation.js';
 import { packagesPageConfig } from '../src/config/packages.js';
 import { selectedWorkConfig } from '../src/config/selectedWork.js';
+import { teamPageConfig } from '../src/config/team.js';
 
 const baseUrl = process.env.QA_BASE_URL || 'http://127.0.0.1:5173';
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -70,13 +71,24 @@ for (const viewport of [
   await page.screenshot({ path: path.join(outputDir, `packages-${viewport.name}.png`), fullPage: false });
 
   const staticPages = {};
-  for (const pathname of ['/services', '/about', '/team', '/missing-page']) {
+  for (const pathname of ['/services', '/about', '/missing-page']) {
     await visit(page, pathname);
     staticPages[pathname] = await page.evaluate(() => ({
       heading: document.querySelector('h1')?.textContent.trim(),
       horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     }));
   }
+
+  await visit(page, '/team');
+  await page.locator('.team-card').first().waitFor({ state: 'visible' });
+  const team = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.team-card').length,
+    handles: [...document.querySelectorAll('.team-discord-handle')].map((element) => element.textContent.trim()),
+    portraits: document.querySelectorAll('.team-avatar, .team-avatar-fallback').length,
+    brokenImages: [...document.querySelectorAll('.team-avatar')].filter((image) => image.complete && !image.naturalWidth).length,
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
+  await page.screenshot({ path: path.join(outputDir, `team-${viewport.name}.png`), fullPage: false });
 
   await visit(page, '/portfolio');
   await page.locator('.live-status--live').waitFor({ state: 'visible', timeout: 20_000 });
@@ -126,9 +138,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
+    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, team, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, portfolio, caseStudies, careerLinks, fields, errors });
+    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, team, portfolio, caseStudies, careerLinks, fields, errors });
   }
 
   await page.close();
@@ -150,6 +162,11 @@ if (report.some((item) => item.errors.length
   || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
   || !item.packageTitleZooms
   || Object.values(item.staticPages).some((page) => !page.heading || page.horizontalOverflow)
+  || item.team.cards !== teamPageConfig.members.length
+  || item.team.handles.some((handle, index) => !handle.includes(teamPageConfig.members[index].discordUsername))
+  || item.team.portraits !== teamPageConfig.members.length
+  || item.team.brokenImages
+  || item.team.horizontalOverflow
   || item.portfolio.cards !== 1
   || item.portfolio.liveChips !== 1
   || !item.portfolio.visibleImagesLoaded

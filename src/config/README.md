@@ -8,7 +8,7 @@ This folder is the main customization surface for the website.
 - `packages.js`: Packages page hero, package cards, labels, pricing, inclusions, and note.
 - `portfolio.js`: live Portfolio page headings, status text, and stat labels.
 - `caseStudies.js`: Case Studies page headings, labels, buttons, and empty state.
-- `team.js`: Team page hero and team members.
+- `team.js`: Team page hero and members, including Discord user IDs, fallback usernames, names, roles, initials, and bios.
 - `about.js`: About page hero, manifesto, values, and team call to action.
 - `careers.js`: Careers page hero, open roles, apply label, and closing note.
 - `contact.js`: Contact page copy, form options, status labels, and success message.
