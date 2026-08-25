@@ -1,31 +1,8 @@
-import { ArrowRight, ArrowUpRight, Play } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { siteConfig } from '../config/site';
 import ProjectCard from '../components/ProjectCard';
 import SectionHeading from '../components/SectionHeading';
-
-function HeroVisual() {
-  return (
-    <div className="hero-visual" aria-label="Animated campaign dashboard artwork">
-      <div className="hero-board">
-        <div className="hero-board-top">
-          <span>ROVIRAL / LIVE SIGNAL</span>
-          <span className="live-chip"><i /> CAMPAIGN LIVE</span>
-        </div>
-        <div className="hero-board-center">
-          <span className="hero-play"><Play fill="currentColor" size={25} /></span>
-          <div><b>12.8M</b><small>views this cycle</small></div>
-        </div>
-        <div className="hero-timeline">
-          {[35, 58, 42, 78, 63, 92, 74, 100, 82, 96].map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}
-        </div>
-      </div>
-      <span className="floating-tag floating-tag--one">+41% PTR</span>
-      <span className="floating-tag floating-tag--two">TRENDING ↑</span>
-      <div className="visual-marquee"><span>CONTENT / COMMUNITY / CREATIVE / GROWTH /</span></div>
-    </div>
-  );
-}
 
 export default function HomePage() {
   return (
@@ -45,7 +22,6 @@ export default function HomePage() {
               <Link className="text-link" to={siteConfig.hero.secondaryCta.path}>{siteConfig.hero.secondaryCta.label}<ArrowRight size={18} /></Link>
             </div>
           </div>
-          <HeroVisual />
         </div>
         <div className="container hero-stats">
           {siteConfig.hero.stats.map((stat) => <div key={stat.label}><strong>{stat.value}</strong><span>{stat.label}</span></div>)}

@@ -1184,3 +1184,505 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* RoViral dark green brand theme */
+:root {
+  --ink: #050806;
+  --ink-soft: #0b120d;
+  --paper: #f1f6f2;
+  --white: #0b100c;
+  --lime: #20ef55;
+  --coral: #20ef55;
+  --cyan: #58d991;
+  --yellow: #b6ff68;
+  --muted: #98a39a;
+  --line: #273229;
+}
+
+body {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.announcement {
+  color: #b8c3ba;
+  background: #020403;
+  border-bottom: 1px solid #152018;
+}
+
+.announcement a,
+.project-result,
+.career-row a,
+.contact-direct a {
+  color: var(--lime);
+}
+
+.site-header {
+  color: var(--paper);
+  background: rgba(5, 8, 6, 0.9);
+  border-color: rgba(241, 246, 242, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.brand-mark {
+  color: var(--paper);
+}
+
+.brand-logo {
+  width: 45px;
+  height: 38px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0 15px rgba(32, 239, 85, 0.12));
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.brand-mark:hover .brand-logo {
+  transform: translateY(-2px) rotate(-2deg);
+}
+
+.brand-symbol {
+  display: none;
+}
+
+.desktop-nav a {
+  color: #c0c9c2;
+}
+
+.desktop-nav a::after {
+  background: var(--lime);
+}
+
+.icon-button {
+  color: var(--paper);
+  border-color: #344138;
+}
+
+.icon-button:hover {
+  color: var(--ink);
+  background: var(--lime);
+  border-color: var(--lime);
+}
+
+.button--dark,
+.button--lime {
+  color: var(--ink);
+  background: var(--lime);
+}
+
+.button--dark:hover,
+.button--lime:hover {
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 10px 35px rgba(32, 239, 85, 0.12);
+}
+
+.home-hero {
+  min-height: calc(100vh - 108px);
+  position: relative;
+  padding-top: 0;
+  color: var(--paper);
+  background-color: #031007;
+  background-image: url('/assets/hero-thumbnail.png');
+  background-position: center;
+  background-size: cover;
+  border-color: #1c2920;
+  isolation: isolate;
+}
+
+.home-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: rgba(2, 9, 4, 0.7);
+}
+
+.home-hero-inner {
+  min-height: calc(100vh - 204px);
+  grid-template-columns: 1fr;
+  align-items: center;
+  padding-block: clamp(4.5rem, 9vw, 8rem) clamp(3rem, 7vw, 6rem);
+}
+
+.hero-copy {
+  width: min(100%, 920px);
+  padding-bottom: 0;
+}
+
+.hero-copy .eyebrow,
+.home-hero .eyebrow {
+  color: #c4cec6;
+}
+
+.hero-copy h1 {
+  color: var(--paper);
+  text-shadow: 0 12px 45px rgba(0, 0, 0, 0.35);
+}
+
+.hero-copy h1 .outline-line {
+  -webkit-text-stroke-color: var(--paper);
+}
+
+.hero-body {
+  color: #c5d0c7;
+}
+
+.hero-stats {
+  position: relative;
+  z-index: 2;
+  margin-top: 0;
+  border-color: rgba(241, 246, 242, 0.18);
+  background: rgba(3, 10, 5, 0.74);
+  backdrop-filter: blur(12px);
+}
+
+.hero-stats div {
+  border-color: rgba(241, 246, 242, 0.16);
+}
+
+.hero-stats strong {
+  color: var(--lime);
+}
+
+.hero-stats span {
+  color: #b2bdb4;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.64rem;
+  text-transform: uppercase;
+}
+
+.home-services,
+.process-section,
+.services-page,
+.packages-section,
+.case-list,
+.team-section,
+.manifesto,
+.careers-list,
+.page-hero,
+.portfolio-page,
+.selected-work {
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.selected-work,
+.portfolio-page,
+.page-hero--dark,
+.contact-page,
+.site-footer {
+  background: #020403;
+}
+
+.section-heading h2,
+.page-hero h1,
+.service-strip h3,
+.process-grid h3,
+.service-detail-main h2,
+.package-card h2,
+.case-copy h2,
+.team-card h2,
+.manifesto-grid h2,
+.values-grid h3,
+.career-row h2 {
+  color: var(--paper);
+}
+
+.page-hero .eyebrow {
+  color: #aeb9b0;
+}
+
+.section-heading > div > p,
+.section-heading--inverse > div > p,
+.page-hero-copy p,
+.page-hero--dark .page-hero-copy p,
+.service-strip p,
+.process-grid p,
+.service-detail-main p,
+.project-card > p,
+.case-copy > p,
+.case-metric span,
+.team-card > p,
+.manifesto-grid > div > p,
+.values-grid p,
+.career-row p,
+.package-note p {
+  color: var(--muted);
+}
+
+.service-strips,
+.service-strip,
+.process-grid,
+.process-grid article,
+.service-detail-list,
+.service-detail,
+.team-card,
+.values-grid,
+.values-grid article,
+.career-row,
+.package-note,
+.case-study,
+.case-metric {
+  border-color: var(--line);
+}
+
+.service-strip {
+  transition: color 260ms ease, background 260ms ease, padding 260ms ease;
+}
+
+.service-strip:hover {
+  color: var(--ink);
+  background: var(--lime);
+}
+
+.service-strip:hover h3,
+.service-strip:hover p {
+  color: var(--ink);
+}
+
+.process-grid article {
+  background: transparent;
+}
+
+.project-card .graphic-panel {
+  transition: transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 600ms ease;
+}
+
+.project-card:hover .graphic-panel {
+  transform: translateY(-6px);
+  filter: saturate(1.08) brightness(1.05);
+}
+
+.package-card {
+  color: var(--paper);
+  background: #0a100b;
+  border-color: #2b382e;
+  transition: transform 350ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 350ms ease, background 350ms ease;
+}
+
+.package-card:hover {
+  transform: translateY(-7px);
+  border-color: #4c6552;
+  background: #0e1710;
+}
+
+.package-card--featured,
+.package-card--featured:hover {
+  background: #0d2113;
+  border-color: var(--lime);
+}
+
+.package-card--featured {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.24);
+}
+
+.package-card h2,
+.package-card--featured h2,
+.package-card li svg,
+.package-card--featured li svg,
+.service-detail-main > span,
+.team-card > strong,
+.case-metric strong {
+  color: var(--lime);
+}
+
+.package-price,
+.contact-direct {
+  border-color: var(--line);
+}
+
+.package-description,
+.package-card--featured .package-description,
+.package-price span,
+.package-card--featured .package-price span {
+  color: var(--muted);
+}
+
+.package-note .text-link,
+.package-note span,
+.career-note,
+.career-note p {
+  color: var(--ink);
+}
+
+.team-portrait {
+  border-color: #344038;
+  background: var(--accent);
+}
+
+.team-portrait::after {
+  background: var(--paper);
+}
+
+.case-tags i,
+.role-skills i {
+  color: #b9c4bb;
+  border-color: #344138;
+}
+
+.home-cta,
+.about-team-cta,
+.career-note {
+  color: var(--ink);
+  background: var(--lime);
+}
+
+.home-cta .eyebrow,
+.about-team-cta .eyebrow {
+  color: var(--ink);
+}
+
+.home-cta .eyebrow::before,
+.about-team-cta .eyebrow::before {
+  background: var(--ink);
+}
+
+.home-cta-inner h2,
+.about-team-cta h2 {
+  color: var(--ink);
+}
+
+.home-cta-inner h2 em {
+  -webkit-text-stroke-color: var(--ink);
+}
+
+.contact-form-wrap {
+  color: var(--paper);
+  background: #0b110c;
+  border: 1px solid #28352b;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+  color: var(--paper);
+  border-color: #465249;
+  background: transparent;
+}
+
+.contact-form select option {
+  color: var(--paper);
+  background: #0b110c;
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+  border-color: var(--lime);
+  box-shadow: 0 2px 0 var(--lime);
+}
+
+.form-success h2 {
+  color: var(--paper);
+}
+
+.form-success svg {
+  color: var(--lime);
+}
+
+.footer-grid > div:first-child > p,
+.footer-bottom {
+  color: #829087;
+}
+
+.round-cta {
+  background: var(--lime);
+}
+
+.round-cta:hover {
+  background: var(--paper);
+}
+
+@keyframes rise-soft {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-soft {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hero-copy .eyebrow,
+.hero-copy h1,
+.hero-copy .hero-body,
+.hero-copy .button-row,
+.hero-stats {
+  opacity: 0;
+  animation: rise-soft 800ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.hero-copy h1 { animation-delay: 90ms; }
+.hero-copy .hero-body { animation-delay: 180ms; }
+.hero-copy .button-row { animation-delay: 270ms; }
+.hero-stats { animation-delay: 360ms; }
+
+@supports (animation-timeline: view()) {
+  .section-heading,
+  .service-strip,
+  .project-card,
+  .process-grid article,
+  .case-study,
+  .team-card,
+  .career-row {
+    animation: rise-soft linear both;
+    animation-timeline: view();
+    animation-range: entry 6% cover 23%;
+  }
+
+  .package-card {
+    animation: rise-soft linear both;
+    animation-timeline: view();
+    animation-range: entry 2% cover 14%;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-hero {
+    min-height: auto;
+    background-position: 58% center;
+  }
+
+  .home-hero-inner {
+    min-height: 690px;
+    padding-block: 5rem 3.5rem;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(3.2rem, 16vw, 5.4rem);
+  }
+
+  .hero-stats {
+    background: rgba(2, 8, 4, 0.84);
+  }
+
+  .hero-stats div,
+  .hero-stats div:not(:first-child) {
+    border-color: rgba(241, 246, 242, 0.14);
+  }
+
+  .package-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy .eyebrow,
+  .hero-copy h1,
+  .hero-copy .hero-body,
+  .hero-copy .button-row,
+  .hero-stats,
+  .section-heading,
+  .service-strip,
+  .project-card,
+  .process-grid article,
+  .package-card,
+  .case-study,
+  .team-card,
+  .career-row {
+    opacity: 1;
+    animation: none !important;
+    transform: none;
+  }
+}
