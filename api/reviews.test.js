@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it } from 'vitest';
-import { buildReviewPayload, createReview, normalizeReview, parseApprovedReview, readReviewState, validateReview } from './reviews.js';
+import { buildReviewPayload, createReview, getNextReviewId, normalizeReview, parseApprovedReview, readReviewState, validateReview } from './reviews.js';
 
 describe('review submissions', () => {
   it('normalizes and validates a review', () => {
@@ -46,6 +46,7 @@ describe('review submissions', () => {
     const fetchMock = async (url, options) => {
       calls.push({ url, options });
       if (options.method === 'POST') return { ok: true, json: async () => ({ id: 'message-id' }) };
+      if (!options.method) return { ok: true, json: async () => [] };
       return { ok: true };
     };
     const result = await createReview(
@@ -54,8 +55,21 @@ describe('review submissions', () => {
       fetchMock,
     );
     expect(result).toEqual({ status: 200, data: { ok: true, message: 'Review sent' } });
-    expect(calls).toHaveLength(3);
-    expect(calls[0].url).toContain('/channels/123456789012345678/messages');
-    expect(calls.slice(1).every((call) => call.options.method === 'PUT')).toBe(true);
+    expect(calls).toHaveLength(4);
+    expect(calls[1].url).toContain('/channels/123456789012345678/messages');
+    expect(JSON.parse(calls[1].options.body).embeds[0].footer.text).toContain('| review1');
+    expect(calls.slice(2).every((call) => call.options.method === 'PUT')).toBe(true);
+  });
+
+  it('increments simple review IDs', async () => {
+    const fetchMock = async () => ({
+      ok: true,
+      json: async () => [
+        { embeds: [{ footer: { text: 'RoViral Review | approved | review2' } }] },
+        { embeds: [{ footer: { text: 'RoViral Review | pending | review7' } }] },
+        { embeds: [{ footer: { text: 'RoViral Review | approved | old-uuid' } }] },
+      ],
+    });
+    await expect(getNextReviewId({ token: 'token', channelId: 'channel' }, fetchMock)).resolves.toBe('review8');
   });
 });

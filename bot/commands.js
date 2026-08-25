@@ -1,13 +1,14 @@
 // Made by loxqcx on Discord.
 import { InteractionContextType, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import { reviewsConfig } from '../src/config/reviews.js';
-import { deleteReviewById } from './reviews.js';
+import { deleteAllReviews, deleteReviewById } from './reviews.js';
 
 export const testCommand = new SlashCommandBuilder()
   .setName('test')
   .setDescription('Check that the RoViral bot is working.');
 
 const deleteConfig = reviewsConfig.moderation.deleteCommand;
+const deleteAllConfig = reviewsConfig.moderation.deleteAllCommand;
 
 export const deleteReviewCommand = new SlashCommandBuilder()
   .setName(deleteConfig.name)
@@ -17,10 +18,15 @@ export const deleteReviewCommand = new SlashCommandBuilder()
     .setName(deleteConfig.optionName)
     .setDescription(deleteConfig.optionDescription)
     .setRequired(true)
-    .setMinLength(8)
+    .setMinLength(`${reviewsConfig.moderation.idPrefix}1`.length)
     .setMaxLength(64));
 
-const commandBuilders = [testCommand, deleteReviewCommand];
+export const deleteAllReviewsCommand = new SlashCommandBuilder()
+  .setName(deleteAllConfig.name)
+  .setDescription(deleteAllConfig.description)
+  .setContexts(InteractionContextType.Guild);
+
+const commandBuilders = [testCommand, deleteReviewCommand, deleteAllReviewsCommand];
 
 export async function registerCommands(client, guildId) {
   const manager = guildId
@@ -44,7 +50,9 @@ export async function handleCommand(interaction, options = {}) {
     await interaction.reply({ content: 'lox test successful', allowedMentions: { parse: [] } });
     return true;
   }
-  if (interaction.commandName !== deleteReviewCommand.toJSON().name) return false;
+  const deletesOne = interaction.commandName === deleteReviewCommand.toJSON().name;
+  const deletesAll = interaction.commandName === deleteAllReviewsCommand.toJSON().name;
+  if (!deletesOne && !deletesAll) return false;
 
   const channelId = options.channelId || reviewsConfig.moderation.channelId;
   const channel = await interaction.client.channels.fetch(channelId);
@@ -59,10 +67,17 @@ export async function handleCommand(interaction, options = {}) {
   }
 
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  if (deletesAll) {
+    const count = channel?.messages ? await deleteAllReviews(channel, interaction.client.user.id) : 0;
+    const message = count
+      ? deleteAllConfig.successMessage.replace('{count}', String(count))
+      : deleteAllConfig.emptyMessage;
+    await interaction.editReply(message);
+    return true;
+  }
+
   const reviewId = interaction.options.getString(deleteConfig.optionName, true);
-  const deleted = channel?.messages
-    ? await deleteReviewById(channel, reviewId, interaction.client.user.id)
-    : false;
+  const deleted = channel?.messages ? await deleteReviewById(channel, reviewId, interaction.client.user.id) : false;
   await interaction.editReply(deleted ? deleteConfig.successMessage : deleteConfig.notFoundMessage);
   return true;
 }

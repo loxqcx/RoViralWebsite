@@ -1,7 +1,7 @@
 // Made by loxqcx on Discord.
 import { ActivityType, Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 import { handleCommand, registerCommands } from './commands.js';
-import { handleReviewReaction, syncPendingReviewReactions } from './reviews.js';
+import { handleReviewReaction, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
 import { reviewsConfig } from '../src/config/reviews.js';
 
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -30,6 +30,8 @@ client.once(Events.ClientReady, async (readyClient) => {
   });
   try {
     console.log(await registerCommands(readyClient, guildId));
+    const migratedReviews = await migrateLegacyReviewIds(readyClient, reviewChannelId);
+    if (migratedReviews) console.log(`Migrated ${migratedReviews} review ID(s).`);
     const repairedReviews = await syncPendingReviewReactions(readyClient, reviewChannelId);
     if (repairedReviews) console.log(`Checked reactions on ${repairedReviews} pending review(s).`);
   } catch (error) {

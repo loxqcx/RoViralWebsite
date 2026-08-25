@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { buildModeratedEmbed, findReviewMessage, handleReviewReaction, syncPendingReviewReactions } from './reviews.js';
+import { buildModeratedEmbed, deleteAllReviews, findReviewMessage, handleReviewReaction, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
 
 describe('review moderation', () => {
   const pending = {
@@ -47,11 +47,23 @@ describe('review moderation', () => {
     expect(reply).toHaveBeenCalledWith({ content: 'Review declined', allowedMentions: { parse: [] } });
   });
 
-  it('finds only approved reviews by their footer ID', async () => {
+  it('finds reviews in any state by their footer ID', async () => {
     const approved = { id: 'approved-message', embeds: [{ footer: { text: 'RoViral Review | approved | target-id' } }] };
     const pending = { id: 'pending-message', embeds: [{ footer: { text: 'RoViral Review | pending | other-id' } }] };
     const channel = { messages: { fetch: vi.fn().mockResolvedValue(new Map([[pending.id, pending], [approved.id, approved]])) } };
     await expect(findReviewMessage(channel, 'TARGET-ID')).resolves.toBe(approved);
+    await expect(findReviewMessage(channel, 'OTHER-ID')).resolves.toBe(pending);
+  });
+
+  it('deletes review embeds without deleting unrelated messages', async () => {
+    const remove = vi.fn();
+    const unrelatedRemove = vi.fn();
+    const review = { id: 'review', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | declined | review3' } }], delete: remove };
+    const unrelated = { id: 'unrelated', author: { id: 'bot-id' }, embeds: [], delete: unrelatedRemove };
+    const channel = { messages: { fetch: vi.fn().mockResolvedValue(new Map([[review.id, review], [unrelated.id, unrelated]])) } };
+    await expect(deleteAllReviews(channel, 'bot-id')).resolves.toBe(1);
+    expect(remove).toHaveBeenCalledOnce();
+    expect(unrelatedRemove).not.toHaveBeenCalled();
   });
 
   it('restores both reactions on pending reviews at startup', async () => {
@@ -100,5 +112,30 @@ describe('review moderation', () => {
     await syncPendingReviewReactions(client, 'channel-id');
     expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| approved |');
     expect(reply).toHaveBeenCalledWith({ content: 'Review approved', allowedMentions: { parse: [] } });
+  });
+
+  it('migrates legacy IDs to simple sequential IDs', async () => {
+    const firstEdit = vi.fn();
+    const secondEdit = vi.fn();
+    const first = {
+      id: '100',
+      author: { id: 'bot-id' },
+      embeds: [{ footer: { text: 'RoViral Review | approved | old-first' }, fields: [{ name: 'Review ID', value: 'old-first' }] }],
+      edit: firstEdit,
+    };
+    const second = {
+      id: '200',
+      author: { id: 'bot-id' },
+      embeds: [{ footer: { text: 'RoViral Review | pending | old-second' }, fields: [{ name: 'Review ID', value: 'old-second' }] }],
+      edit: secondEdit,
+    };
+    const client = {
+      user: { id: 'bot-id' },
+      channels: { fetch: vi.fn().mockResolvedValue({ messages: { fetch: vi.fn().mockResolvedValue(new Map([[second.id, second], [first.id, first]])) } }) },
+    };
+    await expect(migrateLegacyReviewIds(client, 'channel-id')).resolves.toBe(2);
+    expect(firstEdit.mock.calls[0][0].embeds[0].footer.text).toContain('| review1');
+    expect(secondEdit.mock.calls[0][0].embeds[0].footer.text).toContain('| review2');
+    expect(firstEdit.mock.calls[0][0].embeds[0].fields).toContainEqual(expect.objectContaining({ name: 'Legacy Review ID', value: 'old-first' }));
   });
 });

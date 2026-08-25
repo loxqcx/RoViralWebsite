@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { deleteReviewCommand, handleCommand, registerCommands, testCommand } from './commands.js';
+import { deleteAllReviewsCommand, deleteReviewCommand, handleCommand, registerCommands, testCommand } from './commands.js';
 
 describe('Discord commands', () => {
   it('defines the test slash command', () => {
@@ -15,6 +15,10 @@ describe('Discord commands', () => {
       name: 'deleter',
       options: [{ name: 'id', required: true }],
     });
+  });
+
+  it('defines the delete-all review command', () => {
+    expect(deleteAllReviewsCommand.toJSON()).toMatchObject({ name: 'deleteallrev' });
   });
 
   it('replies to /test', async () => {
@@ -32,7 +36,7 @@ describe('Discord commands', () => {
     });
   });
 
-  it('registers both commands without replacing other commands', async () => {
+  it('registers all commands without replacing other commands', async () => {
     const create = vi.fn();
     const client = {
       application: {
@@ -43,10 +47,11 @@ describe('Discord commands', () => {
       },
     };
 
-    await expect(registerCommands(client)).resolves.toBe('Registered /test and /deleter globally.');
-    expect(create).toHaveBeenCalledTimes(2);
+    await expect(registerCommands(client)).resolves.toBe('Registered /test and /deleter and /deleteallrev globally.');
+    expect(create).toHaveBeenCalledTimes(3);
     expect(create).toHaveBeenCalledWith(testCommand.toJSON());
     expect(create).toHaveBeenCalledWith(deleteReviewCommand.toJSON());
+    expect(create).toHaveBeenCalledWith(deleteAllReviewsCommand.toJSON());
   });
 
   it('deletes an approved review by ID', async () => {
@@ -79,5 +84,34 @@ describe('Discord commands', () => {
     expect(handled).toBe(true);
     expect(remove).toHaveBeenCalledOnce();
     expect(editReply).toHaveBeenCalledWith(expect.stringContaining('Review deleted'));
+  });
+
+  it('deletes all review records', async () => {
+    const firstDelete = vi.fn();
+    const secondDelete = vi.fn();
+    const channel = {
+      messages: {
+        fetch: vi.fn().mockResolvedValue(new Map([
+          ['first', { id: 'first', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | approved | review1' } }], delete: firstDelete }],
+          ['second', { id: 'second', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | pending | review2' } }], delete: secondDelete }],
+        ])),
+      },
+    };
+    const editReply = vi.fn();
+    await handleCommand({
+      isChatInputCommand: () => true,
+      commandName: 'deleteallrev',
+      user: { id: 'staff-id' },
+      memberPermissions: { has: () => true },
+      deferReply: vi.fn(),
+      editReply,
+      client: {
+        user: { id: 'bot-id' },
+        channels: { fetch: vi.fn().mockResolvedValue(channel) },
+      },
+    });
+    expect(firstDelete).toHaveBeenCalledOnce();
+    expect(secondDelete).toHaveBeenCalledOnce();
+    expect(editReply).toHaveBeenCalledWith('Deleted 2 review(s). The website will update on its next refresh.');
   });
 });

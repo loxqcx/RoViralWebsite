@@ -1,5 +1,4 @@
 // Made by loxqcx on Discord.
-import { randomUUID } from 'node:crypto';
 import { getDiscordAvatarUrl } from './discord-users.js';
 import { reviewsConfig } from '../src/config/reviews.js';
 
@@ -79,7 +78,7 @@ const field = (name, value, inline = false) => ({
   inline,
 });
 
-export function buildReviewPayload(data, profile, reviewId = randomUUID()) {
+export function buildReviewPayload(data, profile, reviewId = 'review1') {
   const publicName = data.name || profile.displayName || profile.username || data.discord;
   const embed = {
     title: 'New review awaiting approval',
@@ -133,6 +132,18 @@ const discordRequest = (path, token, options = {}, fetchImpl = fetch) => {
   return fetchImpl(`${API_ROOT}${path}`, { ...options, headers });
 };
 
+export async function getNextReviewId(env, fetchImpl = fetch) {
+  const result = await discordRequest(`/channels/${env.channelId}/messages?limit=100`, env.token, {}, fetchImpl);
+  if (!result.ok) throw new Error(`Discord review ID lookup returned ${result.status}.`);
+  const escapedIdPrefix = reviewsConfig.moderation.idPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const simpleIdPattern = new RegExp(`^${escapedIdPrefix}(\\d+)$`, 'i');
+  const numbers = (await result.json())
+    .map((message) => readReviewState(message.embeds?.[0])?.id.match(simpleIdPattern)?.[1])
+    .filter(Boolean)
+    .map(Number);
+  return `${reviewsConfig.moderation.idPrefix}${Math.max(0, ...numbers) + 1}`;
+}
+
 export async function createReview(body, env, fetchImpl = fetch) {
   if (body?.website) return { status: 200, data: { ok: true, message: 'Review sent' } };
   const review = normalizeReview(body);
@@ -141,9 +152,10 @@ export async function createReview(body, env, fetchImpl = fetch) {
   if (!env.token || !env.channelId) return { status: 503, data: { error: 'Reviews are not configured yet.' } };
 
   const profile = await resolveReviewIdentity(review.discord, env.token, env.guildId, fetchImpl);
+  const reviewId = await getNextReviewId(env, fetchImpl);
   const posted = await discordRequest(`/channels/${env.channelId}/messages`, env.token, {
     method: 'POST',
-    body: JSON.stringify(buildReviewPayload(review, profile)),
+    body: JSON.stringify(buildReviewPayload(review, profile, reviewId)),
   }, fetchImpl);
   if (!posted.ok) throw new Error(`Discord review submission returned ${posted.status}.`);
   const message = await posted.json();

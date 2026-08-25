@@ -30,6 +30,7 @@ export const reviewsConfig = {
     approvalEmoji: '\u2705',
     denialEmoji: '\u274c',
     footerPrefix: 'RoViral Review',
+    idPrefix: 'review',
     colors: {
       pending: 0xf0c94c,
       approved: 0x20ef55,
@@ -40,13 +41,19 @@ export const reviewsConfig = {
     declinedMessage: 'Review declined',
     deleteCommand: {
       name: 'deleter',
-      description: 'Delete an approved review from the website.',
+      description: 'Delete a review by its review ID.',
       optionName: 'id',
       optionDescription: 'The review ID shown in the Discord embed footer.',
       scanLimit: 500,
       successMessage: 'Review deleted. It will disappear after the next website refresh.',
-      notFoundMessage: 'No approved review was found with that ID.',
+      notFoundMessage: 'No review was found with that ID.',
       deniedMessage: 'You do not have permission to delete reviews.',
+    },
+    deleteAllCommand: {
+      name: 'deleteallrev',
+      description: 'Delete every review submission and remove them from the website.',
+      successMessage: 'Deleted {count} review(s). The website will update on its next refresh.',
+      emptyMessage: 'There are no reviews to delete.',
     },
   },
 };

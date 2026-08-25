@@ -3,6 +3,8 @@ import { readReviewState } from '../api/reviews.js';
 import { reviewsConfig } from '../src/config/reviews.js';
 
 const decisionsInProgress = new Set();
+const REVIEW_ID_FIELD = 'Review ID';
+const LEGACY_REVIEW_ID_FIELD = 'Legacy Review ID';
 
 export function buildModeratedEmbed(embed, state) {
   const marker = readReviewState(embed);
@@ -33,6 +35,42 @@ const hasNonBotReaction = (message, emoji) => {
   const reaction = reactions.find((item) => item.emoji.name === emoji);
   return Boolean(reaction && reaction.count - (reaction.me ? 1 : 0) > 0);
 };
+
+export async function migrateLegacyReviewIds(client, channelId = reviewsConfig.moderation.channelId) {
+  const channel = await client.channels.fetch(channelId);
+  if (!channel?.messages) return 0;
+  const messages = [...(await channel.messages.fetch({ limit: 100 })).values()]
+    .filter((message) => message.author?.id === client.user.id)
+    .map((message) => ({ message, embed: message.embeds[0]?.toJSON?.() || message.embeds[0] }))
+    .map((entry) => ({ ...entry, marker: readReviewState(entry.embed) }))
+    .filter((entry) => entry.marker)
+    .sort((a, b) => String(a.message.id).localeCompare(String(b.message.id)));
+  const prefix = reviewsConfig.moderation.idPrefix;
+  const pattern = new RegExp(`^${prefix}(\\d+)$`, 'i');
+  const used = new Set(messages.map(({ marker }) => Number(marker.id.match(pattern)?.[1])).filter(Number.isInteger));
+  let migrated = 0;
+
+  for (const entry of messages.filter(({ marker }) => !pattern.test(marker.id))) {
+    let sequence = 1;
+    while (used.has(sequence)) sequence += 1;
+    used.add(sequence);
+    const nextId = `${prefix}${sequence}`;
+    const fields = (entry.embed.fields || [])
+      .filter((item) => item.name !== LEGACY_REVIEW_ID_FIELD)
+      .map((item) => item.name === REVIEW_ID_FIELD ? { ...item, value: nextId } : item);
+    if (!fields.some((item) => item.name === REVIEW_ID_FIELD)) fields.push({ name: REVIEW_ID_FIELD, value: nextId, inline: false });
+    fields.push({ name: LEGACY_REVIEW_ID_FIELD, value: entry.marker.id, inline: false });
+    await entry.message.edit({
+      embeds: [{
+        ...entry.embed,
+        fields,
+        footer: { text: `${reviewsConfig.moderation.footerPrefix} | ${entry.marker.state} | ${nextId}` },
+      }],
+    });
+    migrated += 1;
+  }
+  return migrated;
+}
 
 export async function syncPendingReviewReactions(client, channelId = reviewsConfig.moderation.channelId) {
   const channel = await client.channels.fetch(channelId);
@@ -68,7 +106,8 @@ export async function findReviewMessage(channel, reviewId, scanLimit = reviewsCo
     const match = messages.find((message) => {
       const embed = message.embeds[0]?.toJSON?.() || message.embeds[0];
       const marker = readReviewState(embed);
-      return marker?.state === 'approved' && marker.id.toLowerCase() === targetId;
+      const legacyId = embed?.fields?.find((item) => item.name === LEGACY_REVIEW_ID_FIELD)?.value;
+      return marker && (marker.id.toLowerCase() === targetId || legacyId?.toLowerCase() === targetId);
     });
     if (match) return match;
     if (messages.length < 100) return null;
@@ -84,6 +123,31 @@ export async function deleteReviewById(channel, reviewId, botUserId) {
   if (!message || message.author?.id !== botUserId) return false;
   await message.delete();
   return true;
+}
+
+export async function deleteAllReviews(channel, botUserId, scanLimit = reviewsConfig.moderation.deleteCommand.scanLimit) {
+  let before;
+  let scanned = 0;
+  let deleted = 0;
+
+  while (scanned < scanLimit) {
+    const batch = await channel.messages.fetch({ limit: Math.min(100, scanLimit - scanned), ...(before ? { before } : {}) });
+    const messages = [...batch.values()];
+    const reviews = messages.filter((message) => {
+      if (message.author?.id !== botUserId) return false;
+      const embed = message.embeds[0]?.toJSON?.() || message.embeds[0];
+      return Boolean(readReviewState(embed));
+    });
+    for (const review of reviews) {
+      await review.delete();
+      deleted += 1;
+    }
+    if (messages.length < 100) break;
+    scanned += messages.length;
+    before = messages.at(-1)?.id;
+  }
+
+  return deleted;
 }
 
 export async function handleReviewReaction(reaction, user, options = {}) {
