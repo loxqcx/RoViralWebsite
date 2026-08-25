@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import PageHero from '../components/PageHero';
 import { siteConfig } from '../config/site';
 

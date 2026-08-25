@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { useMemo, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, LoaderCircle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';

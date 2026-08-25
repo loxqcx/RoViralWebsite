@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

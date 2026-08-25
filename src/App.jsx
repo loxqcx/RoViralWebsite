@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import SiteHeader from './components/SiteHeader';

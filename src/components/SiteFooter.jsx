@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BrandMark from './BrandMark';

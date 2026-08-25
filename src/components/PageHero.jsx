@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 export default function PageHero({ eyebrow, title, body, tone = 'light', aside }) {
   return (
     <section className={`page-hero page-hero--${tone}`}>

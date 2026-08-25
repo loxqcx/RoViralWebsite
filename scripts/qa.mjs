@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { chromium } from 'playwright-core';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -43,6 +44,23 @@ for (const viewport of [
   const packages = await page.locator('.package-card').count();
   await page.screenshot({ path: path.join(outputDir, `packages-${viewport.name}.png`), fullPage: false });
 
+  await visit(page, '/portfolio');
+  await page.locator('.live-status--live').waitFor({ state: 'visible', timeout: 20_000 });
+  await page.locator('.live-games-grid').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    const image = document.querySelector('.live-game-media img');
+    return image?.complete && image.naturalWidth > 0;
+  });
+  const portfolio = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.live-game-card').length,
+    liveChips: document.querySelectorAll('.game-live-chip').length,
+    visibleImagesLoaded: [...document.querySelectorAll('.live-game-media img')]
+      .slice(0, 1)
+      .every((image) => image.complete && image.naturalWidth > 0),
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
+  await page.screenshot({ path: path.join(outputDir, `portfolio-${viewport.name}.png`), fullPage: false });
+
   await visit(page, '/contact');
   const fields = await page.locator('form input, form select, form textarea').count();
   await page.screenshot({ path: path.join(outputDir, `contact-${viewport.name}.png`), fullPage: false });
@@ -51,9 +69,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, packages, fields, menuVisible, errors });
+    report.push({ viewport, home, packages, portfolio, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, packages, fields, errors });
+    report.push({ viewport, home, packages, portfolio, fields, errors });
   }
 
   await page.close();
@@ -62,6 +80,16 @@ for (const viewport of [
 await browser.close();
 console.log(JSON.stringify(report, null, 2));
 
-if (report.some((item) => item.errors.length || item.home.horizontalOverflow || !item.home.logoLoaded || item.home.metricLabels.length !== 3 || item.packages !== 3 || item.fields < 8 || item.menuVisible === false)) {
+if (report.some((item) => item.errors.length
+  || item.home.horizontalOverflow
+  || !item.home.logoLoaded
+  || item.home.metricLabels.length !== 3
+  || item.packages !== 3
+  || item.portfolio.cards !== 1
+  || item.portfolio.liveChips !== 1
+  || !item.portfolio.visibleImagesLoaded
+  || item.portfolio.horizontalOverflow
+  || item.fields < 8
+  || item.menuVisible === false)) {
   process.exitCode = 1;
 }

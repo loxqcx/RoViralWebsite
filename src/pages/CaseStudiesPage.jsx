@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';

@@ -1,40 +1,19 @@
-// This is the main editing surface for the entire public website.
+// Made by loxqcx on Discord.
+import { announcementConfig, brandConfig, footerConfig } from './brand';
+import { homepageMetrics } from './metrics';
+import { navigationConfig } from './navigation';
+
 export const siteConfig = {
-  brand: {
-    name: 'RoViral',
-    shortName: 'RV',
-    descriptor: 'Roblox growth studio',
-    tagline: 'Make your game impossible to scroll past.',
-    logo: '/assets/logo-mark.png',
-    heroImage: '/assets/hero-thumbnail.png',
-    email: 'hello@roviral.com',
-    discordUrl: 'https://discord.gg/UCMjNhMRtk',
-  },
-  announcement: {
-    enabled: true,
-    text: 'Now booking launch campaigns for Q4',
-  },
-  navigation: [
-    { label: 'Home', path: '/' },
-    { label: 'Services', path: '/services' },
-    { label: 'Work', path: '/portfolio' },
-    { label: 'Packages', path: '/packages' },
-    { label: 'About', path: '/about' },
-    { label: 'Careers', path: '/careers', menuOnly: true },
-    { label: 'Our team', path: '/team', menuOnly: true },
-    { label: 'Case studies', path: '/case-studies', menuOnly: true },
-  ],
+  brand: brandConfig,
+  announcement: announcementConfig,
+  navigation: navigationConfig,
   hero: {
     eyebrow: 'The attention layer for Roblox games',
     titleLines: ['Built to be', 'played. Made', 'to go viral.'],
     body: 'Strategy, short-form content, community, and trailers under one roof. We turn good Roblox games into launches people notice.',
     primaryCta: { label: 'Start a project', path: '/contact' },
     secondaryCta: { label: 'See our work', path: '/portfolio' },
-    stats: [
-      { value: '0+', label: 'Views generated' },
-      { value: '0+', label: 'Total clients' },
-      { value: '0.0/5', label: 'Average star reviews' },
-    ],
+    stats: homepageMetrics,
   },
   services: [
     {
@@ -198,8 +177,5 @@ export const siteConfig = {
     budgetOptions: ['Under $2,500', '$2,500 - $5,000', '$5,000 - $10,000', '$10,000+', 'Not sure yet'],
     serviceOptions: ['Short Form Content Creation', 'Content Creation Management', 'Community Management', 'PTR Boosting', 'Roblox Game Growth Audit', 'Game Trailers'],
   },
-  footer: {
-    blurb: 'Strategy, content, community, and creative testing for the next generation of Roblox games.',
-    legal: 'RoViral is an independent studio and is not affiliated with Roblox Corporation.',
-  },
+  footer: footerConfig,
 };

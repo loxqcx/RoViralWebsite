@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { Link } from 'react-router-dom';
 import { siteConfig } from '../config/site';
 

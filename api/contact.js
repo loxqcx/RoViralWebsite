@@ -1,4 +1,5 @@
-const DEFAULT_MENTION_IDS = ['1338968623095615508', '898661166727962626', '860461244627419138'];
+// Made by loxqcx on Discord.
+import { discordConfig } from '../src/config/server.js';
 
 const LIMITS = {
   name: 80,
@@ -35,18 +36,18 @@ export function validateSubmission(data) {
   return null;
 }
 
-export function buildDiscordPayload(data, mentionIds = DEFAULT_MENTION_IDS) {
+export function buildDiscordPayload(data, mentionIds = discordConfig.mentionIds) {
   const safeIds = mentionIds.filter((id) => /^\d{17,20}$/.test(id));
   const field = (name, value, inline = true) => ({ name, value: (value || 'Not provided').slice(0, 1024), inline });
 
   return {
-    username: 'RoViral Forms',
+    username: discordConfig.webhookUsername,
     content: safeIds.map((id) => `<@${id}>`).join(' '),
     allowed_mentions: { parse: [], users: safeIds },
     embeds: [{
       title: 'New project inquiry',
       description: 'A new lead was submitted through the RoViral website.',
-      color: 0xD9FF43,
+      color: discordConfig.embedColor,
       fields: [
         field('Name', data.name),
         field('Email', data.email),
@@ -87,7 +88,7 @@ export default async function handler(request, response) {
     return response.status(503).json({ error: 'The contact form is not configured yet. Please use Discord instead.' });
   }
 
-  const mentionIds = (process.env.DISCORD_MENTION_IDS || DEFAULT_MENTION_IDS.join(','))
+  const mentionIds = (process.env.DISCORD_MENTION_IDS || discordConfig.mentionIds.join(','))
     .split(',')
     .map((id) => id.trim());
 

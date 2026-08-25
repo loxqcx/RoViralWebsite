@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 export default function GraphicPanel({ item, large = false }) {
   return (
     <div

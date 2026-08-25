@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { describe, expect, it } from 'vitest';
 import { buildDiscordPayload, normalizeSubmission, validateSubmission } from './contact';
 

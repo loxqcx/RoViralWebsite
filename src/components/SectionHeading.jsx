@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 export default function SectionHeading({ eyebrow, title, body, inverse = false }) {
   return (
     <div className={`section-heading ${inverse ? 'section-heading--inverse' : ''}`}>

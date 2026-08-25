@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { ArrowUpRight } from 'lucide-react';
 import GraphicPanel from './GraphicPanel';
 

@@ -1,3 +1,4 @@
+// Made by loxqcx on Discord.
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
