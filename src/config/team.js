@@ -14,5 +14,13 @@ export const teamPageConfig = {
       initials: 'E',
       bio: 'The founder of RoViral',
     },
+    {
+      discordUserId: '898661166727962626',
+      discordUsername: 'mrgibler',
+      name: 'Gibler',
+      role: 'Executive',
+      initials: 'E',
+      bio: 'The founder of RoViral',
+    },
   ],
 };
