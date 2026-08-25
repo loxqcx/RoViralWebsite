@@ -2,7 +2,8 @@
 import { useMemo, useState } from 'react';
 import { ArrowUpRight, CheckCircle2, LoaderCircle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import { siteConfig } from '../config/site';
+import { brandConfig } from '../config/brand';
+import { contactPageConfig } from '../config/contact';
 
 const emptyForm = {
   name: '', email: '', company: '', gameLink: '', discord: '', service: '', budget: '', message: '', website: '',
@@ -11,7 +12,7 @@ const emptyForm = {
 export default function ContactPage() {
   const [searchParams] = useSearchParams();
   const packageName = searchParams.get('package');
-  const initialMessage = useMemo(() => packageName ? `I’m interested in the ${packageName} package. ` : '', [packageName]);
+  const initialMessage = useMemo(() => packageName ? `I'm interested in the ${packageName} package. ` : '', [packageName]);
   const [form, setForm] = useState({ ...emptyForm, message: initialMessage });
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
@@ -42,21 +43,21 @@ export default function ContactPage() {
     <section className="contact-page">
       <div className="container contact-grid">
         <div className="contact-intro">
-          <p className="eyebrow eyebrow--light">Start a project</p>
-          <h1>{siteConfig.contact.heading}</h1>
-          <p>{siteConfig.contact.subheading}</p>
+          <p className="eyebrow eyebrow--light">{contactPageConfig.eyebrow}</p>
+          <h1>{contactPageConfig.heading}</h1>
+          <p>{contactPageConfig.subheading}</p>
           <div className="contact-direct">
-            <span>Prefer Discord?</span>
-            <a href={siteConfig.brand.discordUrl} target="_blank" rel="noreferrer">Join the server <ArrowUpRight size={17} /></a>
+            <span>{contactPageConfig.discordPrompt}</span>
+            <a href={brandConfig.discordUrl} target="_blank" rel="noreferrer">{contactPageConfig.discordLabel} <ArrowUpRight size={17} /></a>
           </div>
         </div>
         <div className="contact-form-wrap">
           {status === 'success' ? (
             <div className="form-success">
               <CheckCircle2 size={42} />
-              <h2>Inquiry sent.</h2>
-              <p>Your project is in the queue. The team will get back to you within one business day.</p>
-              <button className="button button--dark" onClick={() => setStatus('idle')}>Send another</button>
+              <h2>{contactPageConfig.success.title}</h2>
+              <p>{contactPageConfig.success.body}</p>
+              <button className="button button--dark" onClick={() => setStatus('idle')}>{contactPageConfig.success.resetLabel}</button>
             </div>
           ) : (
             <form className="contact-form" onSubmit={submit}>
@@ -70,16 +71,16 @@ export default function ContactPage() {
               </div>
               <label>Game link<input type="url" name="gameLink" value={form.gameLink} onChange={update} placeholder="https://www.roblox.com/games/..." maxLength={300} /></label>
               <div className="form-row">
-                <label>Primary service<select required name="service" value={form.service} onChange={update}><option value="" disabled>Select a service</option>{siteConfig.contact.serviceOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
-                <label>Estimated budget<select required name="budget" value={form.budget} onChange={update}><option value="" disabled>Select a range</option>{siteConfig.contact.budgetOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+                <label>Primary service<select required name="service" value={form.service} onChange={update}><option value="" disabled>Select a service</option>{contactPageConfig.serviceOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
+                <label>Estimated budget<select required name="budget" value={form.budget} onChange={update}><option value="" disabled>Select a range</option>{contactPageConfig.budgetOptions.map((option) => <option key={option}>{option}</option>)}</select></label>
               </div>
               <label>Tell us about the game<textarea required name="message" value={form.message} onChange={update} placeholder="What are you building, where is it now, and what would a great result look like?" rows="6" minLength={20} maxLength={2000} /></label>
               <label className="honeypot" aria-hidden="true">Website<input name="website" tabIndex="-1" autoComplete="off" value={form.website} onChange={update} /></label>
               {error && <p className="form-error" role="alert">{error}</p>}
               <button className="button button--dark submit-button" type="submit" disabled={status === 'loading'}>
-                {status === 'loading' ? <><LoaderCircle className="spin" size={18} /> Sending</> : <>Send inquiry <ArrowUpRight size={18} /></>}
+                {status === 'loading' ? <><LoaderCircle className="spin" size={18} /> {contactPageConfig.loadingLabel}</> : <>{contactPageConfig.submitLabel} <ArrowUpRight size={18} /></>}
               </button>
-              <small>By submitting, you agree that we may contact you about this project.</small>
+              <small>{contactPageConfig.consent}</small>
             </form>
           )}
         </div>

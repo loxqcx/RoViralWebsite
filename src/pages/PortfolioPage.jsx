@@ -2,8 +2,9 @@
 import { useMemo } from 'react';
 import { Activity, ArrowUpRight, Eye, Gamepad2 } from 'lucide-react';
 import PageHero from '../components/PageHero';
+import { brandConfig } from '../config/brand';
 import { gamesConfig } from '../config/games';
-import { siteConfig } from '../config/site';
+import { portfolioPageConfig } from '../config/portfolio';
 import { formatGameStat, useGameStats } from '../hooks/useGameStats';
 
 export default function PortfolioPage() {
@@ -19,17 +20,11 @@ export default function PortfolioPage() {
 
   const statusCopy = live.status === 'live'
     ? `Live / refreshed ${new Date(live.updatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
-    : live.status === 'error' ? 'Live stats temporarily unavailable' : 'Connecting to Roblox';
+    : live.status === 'error' ? portfolioPageConfig.status.error : portfolioPageConfig.status.loading;
 
   return (
     <>
-      <PageHero
-        tone="dark"
-        eyebrow="Game portfolio / Live data"
-        title={<>Games built<br />to keep moving.</>}
-        body="A live view of the Roblox experiences in our portfolio, with current players and lifetime visits pulled directly from Roblox."
-        aside="Stats refresh automatically every 60 seconds."
-      />
+      <PageHero tone="dark" {...portfolioPageConfig.hero} />
       <section className="live-portfolio section-pad">
         <div className="container">
           <div className="portfolio-status-bar">
@@ -37,13 +32,13 @@ export default function PortfolioPage() {
               <span className="live-status-dot" />
               <span>{statusCopy}</span>
             </div>
-            <span>Sorted by current players</span>
+            <span>{portfolioPageConfig.labels.sorted}</span>
           </div>
 
           <div className="portfolio-totals">
-            <div><Activity size={19} /><strong>{formatGameStat(live.totals?.playing, loaded)}</strong><span>Playing now</span></div>
-            <div><Eye size={19} /><strong>{formatGameStat(live.totals?.visits, loaded)}</strong><span>Total visits</span></div>
-            <div><Gamepad2 size={19} /><strong>{gamesConfig.games.length}</strong><span>Games tracked</span></div>
+            <div><Activity size={19} /><strong>{formatGameStat(live.totals?.playing, loaded)}</strong><span>{portfolioPageConfig.labels.playing}</span></div>
+            <div><Eye size={19} /><strong>{formatGameStat(live.totals?.visits, loaded)}</strong><span>{portfolioPageConfig.labels.visits}</span></div>
+            <div><Gamepad2 size={19} /><strong>{gamesConfig.games.length}</strong><span>{portfolioPageConfig.labels.tracked}</span></div>
           </div>
 
           <div className="live-games-grid">
@@ -56,7 +51,7 @@ export default function PortfolioPage() {
                     loading={index < 2 ? 'eager' : 'lazy'}
                     onError={(event) => {
                       event.currentTarget.onerror = null;
-                      event.currentTarget.src = siteConfig.brand.heroImage;
+                      event.currentTarget.src = brandConfig.heroImage;
                     }}
                   />
                   {game.badge && <span className="game-badge">{game.badge}</span>}
@@ -69,8 +64,8 @@ export default function PortfolioPage() {
                   </div>
                   <p>{game.description}</p>
                   <div className="live-game-footer">
-                    <div className="game-stat"><strong>{formatGameStat(game.stats?.playing, loaded)}</strong><span>Live CCU</span></div>
-                    <div className="game-stat"><strong>{formatGameStat(game.stats?.visits, loaded)}</strong><span>Visits</span></div>
+                    <div className="game-stat"><strong>{formatGameStat(game.stats?.playing, loaded)}</strong><span>{portfolioPageConfig.labels.liveCcu}</span></div>
+                    <div className="game-stat"><strong>{formatGameStat(game.stats?.visits, loaded)}</strong><span>{portfolioPageConfig.labels.cardVisits}</span></div>
                     <a className="game-play-link" href={game.robloxUrl} target="_blank" rel="noreferrer" aria-label={`Play ${game.name} on Roblox`} title="Open on Roblox">
                       <ArrowUpRight size={22} />
                     </a>

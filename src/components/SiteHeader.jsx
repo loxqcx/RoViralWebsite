@@ -2,22 +2,23 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ArrowUpRight, Menu, X } from 'lucide-react';
-import { siteConfig } from '../config/site';
+import { announcementConfig, brandConfig } from '../config/brand';
+import { navigationConfig } from '../config/navigation';
 import BrandMark from './BrandMark';
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const primary = siteConfig.navigation.filter((item) => !item.menuOnly);
-  const secondary = siteConfig.navigation.filter((item) => item.menuOnly);
+  const primary = navigationConfig.filter((item) => !item.menuOnly);
+  const secondary = navigationConfig.filter((item) => item.menuOnly);
 
   const close = () => setOpen(false);
 
   return (
     <>
-      {siteConfig.announcement.enabled && (
+      {announcementConfig.enabled && (
         <div className="announcement">
           <span className="pulse-dot" />
-          {siteConfig.announcement.text}
+          {announcementConfig.text}
           <Link to="/contact">Book a call <ArrowUpRight size={14} /></Link>
         </div>
       )}
@@ -51,8 +52,7 @@ export default function SiteHeader() {
             ))}
           </nav>
           <div className="mobile-menu-footer">
-            <a href={siteConfig.brand.discordUrl} target="_blank" rel="noreferrer">Join Discord <ArrowUpRight size={18} /></a>
-            <a href={`mailto:${siteConfig.brand.email}`}>{siteConfig.brand.email}</a>
+            <a href={brandConfig.discordUrl} target="_blank" rel="noreferrer">Join Discord <ArrowUpRight size={18} /></a>
           </div>
         </div>
       )}

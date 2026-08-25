@@ -2,7 +2,8 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BrandMark from './BrandMark';
-import { siteConfig } from '../config/site';
+import { brandConfig, footerConfig } from '../config/brand';
+import { navigationConfig } from '../config/navigation';
 
 export default function SiteFooter() {
   return (
@@ -20,22 +21,21 @@ export default function SiteFooter() {
       <div className="container footer-grid">
         <div>
           <BrandMark inverse />
-          <p>{siteConfig.footer.blurb}</p>
+          <p>{footerConfig.blurb}</p>
         </div>
         <div className="footer-links">
           <strong>Explore</strong>
-          {siteConfig.navigation.map((item) => <Link key={item.path} to={item.path}>{item.label}</Link>)}
+          {navigationConfig.map((item) => <Link key={item.path} to={item.path}>{item.label}</Link>)}
         </div>
         <div className="footer-links">
           <strong>Connect</strong>
-          <a href={siteConfig.brand.discordUrl} target="_blank" rel="noreferrer">Discord <ArrowUpRight size={13} /></a>
-          <a href={`mailto:${siteConfig.brand.email}`}>Email <ArrowUpRight size={13} /></a>
+          <a href={brandConfig.discordUrl} target="_blank" rel="noreferrer">Discord <ArrowUpRight size={13} /></a>
           <Link to="/contact">Project inquiry</Link>
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© {new Date().getFullYear()} {siteConfig.brand.name}</span>
-        <span>{siteConfig.footer.legal}</span>
+        <span>© {new Date().getFullYear()} {brandConfig.name}</span>
+        <span>{footerConfig.legal}</span>
       </div>
     </footer>
   );

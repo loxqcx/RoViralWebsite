@@ -2,17 +2,16 @@
 export const brandConfig = {
   name: 'RoViral',
   shortName: 'RV',
-  descriptor: 'Roblox growth studio',
+  descriptor: 'Roblox marketing Team',
   tagline: 'Make your game impossible to scroll past.',
   logo: '/assets/logo-mark.png',
   heroImage: '/assets/hero-thumbnail.png',
-  email: 'hello@roviral.com',
   discordUrl: 'https://discord.gg/UCMjNhMRtk',
 };
 
 export const announcementConfig = {
   enabled: true,
-  text: 'Now booking launch campaigns for Q4',
+  text: 'HIRE THE BEST MARKETING TEAM NOW!',
 };
 
 export const footerConfig = {

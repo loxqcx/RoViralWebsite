@@ -1,0 +1,59 @@
+// Made by loxqcx on Discord.
+export const servicesPageConfig = {
+  hero: {
+    eyebrow: 'Services',
+    title: ['From first view', 'to daily player.'],
+    body: 'Acquisition only works when the promise, content, and community reinforce each other. Our services are designed as one connected growth system.',
+    aside: 'Available as focused sprints or ongoing partnerships.',
+  },
+  services: [
+    {
+      id: '01',
+      title: 'Short Form Content Creation',
+      shortTitle: 'Short form',
+      description: 'Platform-native videos built around hooks, repeatable formats, and the moments players want to share.',
+      deliverables: ['Creative concepts', 'Editing and captions', 'Platform-ready exports', 'Performance iteration'],
+      accent: 'lime',
+    },
+    {
+      id: '02',
+      title: 'Content Creation Management',
+      shortTitle: 'Content ops',
+      description: 'A complete content pipeline, from creator briefs and calendars to approvals, publishing, and reporting.',
+      deliverables: ['Monthly content plan', 'Creator coordination', 'Publishing calendar', 'Weekly reporting'],
+      accent: 'coral',
+    },
+    {
+      id: '03',
+      title: 'Community Management',
+      shortTitle: 'Community',
+      description: 'Human, fast, on-brand community care that turns players into regulars and regulars into advocates.',
+      deliverables: ['Discord operations', 'Event programming', 'Feedback reports', 'Moderation playbooks'],
+      accent: 'cyan',
+    },
+    {
+      id: '04',
+      title: 'PTR Boosting',
+      shortTitle: 'PTR growth',
+      description: 'Thumbnail and icon testing that improves the first impression your game makes on discovery surfaces.',
+      deliverables: ['Visual audit', 'Creative variants', 'Test roadmap', 'Performance review'],
+      accent: 'yellow',
+    },
+    {
+      id: '05',
+      title: 'Roblox Game Growth Audit',
+      shortTitle: 'Growth audit',
+      description: 'A clear diagnostic of your acquisition funnel, positioning, content, community, and growth blockers.',
+      deliverables: ['90-minute workshop', 'Channel analysis', 'Prioritized roadmap', '30-day action plan'],
+      accent: 'lime',
+    },
+    {
+      id: '06',
+      title: 'Game Trailers',
+      shortTitle: 'Trailers',
+      description: 'Launch trailers and update teasers paced for attention, clarity, and the exact promise of your game.',
+      deliverables: ['Creative direction', 'Capture plan', 'Edit and sound design', 'Multi-format delivery'],
+      accent: 'coral',
+    },
+  ],
+};

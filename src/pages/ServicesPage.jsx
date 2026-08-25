@@ -2,15 +2,15 @@
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
-import { siteConfig } from '../config/site';
+import { servicesPageConfig } from '../config/services';
 
 export default function ServicesPage() {
   return (
     <>
-      <PageHero eyebrow="Services / 06" title={<>From first view<br />to daily player.</>} body="Acquisition only works when the promise, content, and community reinforce each other. Our services are designed as one connected growth system." aside="Available as focused sprints or ongoing partnerships." />
+      <PageHero {...servicesPageConfig.hero} eyebrow={`${servicesPageConfig.hero.eyebrow} / ${String(servicesPageConfig.services.length).padStart(2, '0')}`} />
       <section className="services-page section-pad">
         <div className="container service-detail-list">
-          {siteConfig.services.map((service) => (
+          {servicesPageConfig.services.map((service) => (
             <article className={`service-detail accent-${service.accent}`} key={service.id}>
               <div className="service-detail-number">{service.id}</div>
               <div className="service-detail-main">

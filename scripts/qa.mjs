@@ -5,6 +5,8 @@ import path from 'node:path';
 import { brandConfig } from '../src/config/brand.js';
 import { gamesConfig } from '../src/config/games.js';
 import { navigationConfig } from '../src/config/navigation.js';
+import { packagesPageConfig } from '../src/config/packages.js';
+import { selectedWorkConfig } from '../src/config/selectedWork.js';
 
 const baseUrl = process.env.QA_BASE_URL || 'http://127.0.0.1:5173';
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -45,9 +47,36 @@ for (const viewport of [
     metricLabels: [...document.querySelectorAll('.hero-stats span')].map((element) => element.textContent),
   }));
 
+  await page.locator('.selected-work').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => [...document.querySelectorAll('.selected-work-media img')]
+    .every((image) => image.complete && image.naturalWidth > 0));
+  const selectedWork = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.selected-work .project-card').length,
+    labels: [...document.querySelectorAll('.selected-work-media span')].map((element) => element.textContent),
+    stats: [...document.querySelectorAll('.project-meta strong')].map((element) => element.textContent),
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
+  await page.screenshot({ path: path.join(outputDir, `selected-work-${viewport.name}.png`), fullPage: false });
+
   await visit(page, '/packages');
   const packages = await page.locator('.package-card').count();
+  const packageActions = await page.locator('.package-card .button').evaluateAll((links) => links.map((link) => ({ href: link.href, text: link.textContent.trim() })));
+  const packageTitle = page.locator('.package-card h2').first();
+  const titleTransformBefore = await packageTitle.evaluate((element) => getComputedStyle(element).transform);
+  await page.locator('.package-card').first().hover();
+  await page.waitForTimeout(350);
+  const titleTransformAfter = await packageTitle.evaluate((element) => getComputedStyle(element).transform);
+  const packageTitleZooms = titleTransformAfter !== titleTransformBefore;
   await page.screenshot({ path: path.join(outputDir, `packages-${viewport.name}.png`), fullPage: false });
+
+  const staticPages = {};
+  for (const pathname of ['/services', '/about', '/team', '/missing-page']) {
+    await visit(page, pathname);
+    staticPages[pathname] = await page.evaluate(() => ({
+      heading: document.querySelector('h1')?.textContent.trim(),
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    }));
+  }
 
   await visit(page, '/portfolio');
   await page.locator('.live-status--live').waitFor({ state: 'visible', timeout: 20_000 });
@@ -97,9 +126,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, packages, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
+    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, packages, portfolio, caseStudies, careerLinks, fields, errors });
+    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, portfolio, caseStudies, careerLinks, fields, errors });
   }
 
   await page.close();
@@ -113,7 +142,14 @@ if (report.some((item) => item.errors.length
   || !item.home.logoLoaded
   || item.home.navLinks !== navigationConfig.length
   || item.home.metricLabels.length !== 3
+  || item.selectedWork.cards !== selectedWorkConfig.length
+  || item.selectedWork.labels.some((label, index) => label !== selectedWorkConfig[index].label)
+  || item.selectedWork.stats.some((stat, index) => stat !== selectedWorkConfig[index].stat)
+  || item.selectedWork.horizontalOverflow
   || item.packages !== 3
+  || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
+  || !item.packageTitleZooms
+  || Object.values(item.staticPages).some((page) => !page.heading || page.horizontalOverflow)
   || item.portfolio.cards !== 1
   || item.portfolio.liveChips !== 1
   || !item.portfolio.visibleImagesLoaded
