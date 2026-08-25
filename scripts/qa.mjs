@@ -3,6 +3,7 @@ import { chromium } from 'playwright-core';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { brandConfig } from '../src/config/brand.js';
+import { careersPageConfig } from '../src/config/careers.js';
 import { gamesConfig } from '../src/config/games.js';
 import { navigationConfig } from '../src/config/navigation.js';
 import { packagesPageConfig } from '../src/config/packages.js';
@@ -202,6 +203,13 @@ for (const viewport of [
   await visit(page, '/careers');
   const careerLinks = await page.locator('.career-apply').evaluateAll((links) => links.map((link) => link.href));
   await page.locator('.careers-list').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => [...document.querySelectorAll('.career-icon img')]
+    .every((image) => image.complete && image.naturalWidth > 0));
+  const careers = await page.evaluate(() => ({
+    icons: [...document.querySelectorAll('.career-icon img')].map((image) => image.getAttribute('src')),
+    borderedIcons: [...document.querySelectorAll('.career-icon')].filter((icon) => getComputedStyle(icon).borderStyle !== 'none').length,
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
   await page.screenshot({ path: path.join(outputDir, `careers-${viewport.name}.png`), fullPage: false });
 
   await visit(page, '/contact');
@@ -212,9 +220,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, errors });
   }
 
   await page.close();
@@ -275,6 +283,10 @@ if (report.some((item) => item.errors.length
   || item.caseStudies.horizontalOverflow
   || item.careerLinks.length !== 3
   || item.careerLinks.some((url) => url !== brandConfig.discordUrl)
+  || item.careers.icons.length !== careersPageConfig.roles.length
+  || item.careers.icons.some((icon, index) => icon !== careersPageConfig.roles[index].icon)
+  || item.careers.borderedIcons
+  || item.careers.horizontalOverflow
   || item.fields < 8
   || item.menuVisible === false)) {
   process.exitCode = 1;

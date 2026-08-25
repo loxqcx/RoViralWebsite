@@ -7,9 +7,9 @@ export const careersPageConfig = {
     aside: 'Contract-first. Remote. Portfolio over credentials.',
   },
   roles: [
-    { title: 'Video Editor', type: 'Contract / Remote', description: 'Turn raw Roblox gameplay and creator footage into sharp, platform-native short-form stories.', skills: ['Premiere or Resolve', 'Short-form pacing', 'Motion graphics', 'Roblox fluency'] },
-    { title: 'Content Creator Manager', type: 'Contract / Remote', description: 'Own creator communication, briefs, calendars, feedback, and campaign delivery.', skills: ['Creator operations', 'Clear communication', 'Campaign tracking', 'Platform knowledge'] },
-    { title: 'Clipper', type: 'Flexible / Remote', description: 'Find the moments worth watching and package them into high-volume, high-energy clips.', skills: ['Great taste', 'Fast editing', 'Hook writing', 'Trend awareness'] },
+    { title: 'Video Editor', icon: '/assets/VideoEditor.png', type: 'Contract / Remote', description: 'Turn raw Roblox gameplay and creator footage into sharp, platform-native short-form stories.', skills: ['Premiere or Resolve', 'Short-form pacing', 'Motion graphics', 'Roblox fluency'] },
+    { title: 'Content Creator Manager', icon: '/assets/ContentCreatorManager.png', type: 'Contract / Remote', description: 'Own creator communication, briefs, calendars, feedback, and campaign delivery.', skills: ['Creator operations', 'Clear communication', 'Campaign tracking', 'Platform knowledge'] },
+    { title: 'Clipper', icon: '/assets/Clipper.png', type: 'Flexible / Remote', description: 'Find the moments worth watching and package them into high-volume, high-energy clips.', skills: ['Great taste', 'Fast editing', 'Hook writing', 'Trend awareness'] },
   ],
   applyLabel: 'Apply now',
   note: {

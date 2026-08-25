@@ -11,7 +11,7 @@ This folder is the main customization surface for the website.
 - `caseStudies.js`: Case Studies page headings, labels, buttons, and empty state.
 - `team.js`: Team page hero and members, including Discord user IDs, fallback usernames, names, roles, initials, and bios.
 - `about.js`: About page hero, manifesto, values, and team call to action.
-- `careers.js`: Careers page hero, open roles, apply label, and closing note.
+- `careers.js`: Careers page hero, open roles, icon paths, apply label, and closing note.
 - `contact.js`: Contact page copy, form options, status labels, and success message.
 - `notFound.js`: 404 page copy.
 - `games.js`: portfolio games, case-study visibility, place IDs, thumbnails, Roblox links, display order, and refresh behavior. Set `caseStudies` to `true` to include a game on the Case Studies page.

@@ -10,9 +10,9 @@ export default function CareersPage() {
       <PageHero tone="dark" {...careersPageConfig.hero} />
       <section className="careers-list section-pad">
         <div className="container">
-          {careersPageConfig.roles.map((role, index) => (
+          {careersPageConfig.roles.map((role) => (
             <article className="career-row" key={role.title}>
-              <span>{String(index + 1).padStart(2, '0')}</span>
+              <span className="career-icon" aria-hidden="true"><img src={role.icon} alt="" /></span>
               <div><h2>{role.title}</h2><p>{role.description}</p></div>
               <div className="role-skills">{role.skills.map((skill) => <i key={skill}>{skill}</i>)}</div>
               <div><small>{role.type}</small><a className="career-apply" href={brandConfig.discordUrl} target="_blank" rel="noreferrer">{careersPageConfig.applyLabel} <ArrowUpRight size={17} /></a></div>
