@@ -8,11 +8,11 @@ export const teamPageConfig = {
   members: [
     {
       discordUserId: '1338968623095615508',
-      discordUsername: 'loxqcx',
-      name: 'Erik',
-      role: 'Founder / Growth Strategy',
+      discordUsername: 'dnvlxz_09',
+      name: 'Danny',
+      role: 'Executive',
       initials: 'E',
-      bio: 'Builds focused marketing systems that help Roblox games earn attention and keep growing.',
+      bio: 'The founder of RoViral',
     },
   ],
 };
