@@ -4,7 +4,7 @@ This folder is the main customization surface for the website.
 
 - `brand.js`: brand name, logo, hero image, Discord link, announcement, and footer copy.
 - `home.js`: homepage hero, section headings, process steps, and final call to action.
-- `services.js`: Services page hero, service descriptions, and deliverables.
+- `services.js`: Services page hero, service logo paths, descriptions, and deliverables. Service images live in `public/assets`.
 - `packages.js`: Packages page hero, package cards, labels, pricing, inclusions, and note.
 - `portfolio.js`: live Portfolio page headings, status text, and stat labels.
 - `caseStudies.js`: Case Studies page headings, labels, buttons, and empty state.
@@ -16,7 +16,7 @@ This folder is the main customization surface for the website.
 - `games.js`: portfolio games, case-study visibility, place IDs, thumbnails, Roblox links, display order, and refresh behavior. Set `caseStudies` to `true` to include a game on the Case Studies page.
 - `metrics.js`: homepage values for views, clients, and average reviews.
 - `navigation.js`: header and mobile navigation links.
-- `selectedWork.js`: static homepage Selected Work cards with a name, thumbnail, service label, and displayed stat.
+- `selectedWork.js`: optional static Selected Work card data retained for future use; the homepage currently displays packages instead.
 - `server.js`: Discord mention IDs and public embed presentation settings. Never put the webhook URL here.
 - `theme.css`: global brand colors.
 

@@ -6,7 +6,7 @@ import { brandConfig } from '../src/config/brand.js';
 import { gamesConfig } from '../src/config/games.js';
 import { navigationConfig } from '../src/config/navigation.js';
 import { packagesPageConfig } from '../src/config/packages.js';
-import { selectedWorkConfig } from '../src/config/selectedWork.js';
+import { servicesPageConfig } from '../src/config/services.js';
 import { teamPageConfig } from '../src/config/team.js';
 
 const baseUrl = process.env.QA_BASE_URL || 'http://127.0.0.1:5173';
@@ -46,32 +46,52 @@ for (const viewport of [
     navLinks: document.querySelectorAll('.desktop-nav a').length,
     logoLoaded: Boolean(document.querySelector('.brand-logo')?.complete && document.querySelector('.brand-logo')?.naturalWidth),
     metricLabels: [...document.querySelectorAll('.hero-stats span')].map((element) => element.textContent),
+    bodyFont: getComputedStyle(document.body).fontFamily,
+    headingFont: getComputedStyle(document.querySelector('h1')).fontFamily,
   }));
 
-  await page.locator('.selected-work').scrollIntoViewIfNeeded();
-  await page.waitForFunction(() => [...document.querySelectorAll('.selected-work-media img')]
+  await page.locator('.service-strips').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => [...document.querySelectorAll('.service-strip .service-logo img')]
     .every((image) => image.complete && image.naturalWidth > 0));
-  const selectedWork = await page.evaluate(() => ({
-    cards: document.querySelectorAll('.selected-work .project-card').length,
-    labels: [...document.querySelectorAll('.selected-work-media span')].map((element) => element.textContent),
-    stats: [...document.querySelectorAll('.project-meta strong')].map((element) => element.textContent),
+  const homeServices = await page.evaluate(() => ({
+    logos: [...document.querySelectorAll('.service-strip .service-logo img')].map((image) => image.getAttribute('src')),
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
   }));
-  await page.screenshot({ path: path.join(outputDir, `selected-work-${viewport.name}.png`), fullPage: false });
+  await page.screenshot({ path: path.join(outputDir, `home-services-${viewport.name}.png`), fullPage: false });
+
+  await page.locator('.home-packages').scrollIntoViewIfNeeded();
+  const homePackages = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.home-packages .package-card').length,
+    actions: [...document.querySelectorAll('.home-packages .package-card .button')].map((link) => ({ href: link.href, text: link.textContent.trim() })),
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
+  await page.screenshot({ path: path.join(outputDir, `home-packages-${viewport.name}.png`), fullPage: false });
 
   await visit(page, '/packages');
   const packages = await page.locator('.package-card').count();
   const packageActions = await page.locator('.package-card .button').evaluateAll((links) => links.map((link) => ({ href: link.href, text: link.textContent.trim() })));
-  const packageTitle = page.locator('.package-card h2').first();
-  const titleTransformBefore = await packageTitle.evaluate((element) => getComputedStyle(element).transform);
-  await page.locator('.package-card').first().hover();
+  const packageCards = page.locator('.package-card');
+  const packageCard = packageCards.first();
+  const cardScaleBefore = await packageCard.evaluate((element) => getComputedStyle(element).scale);
+  await packageCard.hover();
   await page.waitForTimeout(350);
-  const titleTransformAfter = await packageTitle.evaluate((element) => getComputedStyle(element).transform);
-  const packageTitleZooms = titleTransformAfter !== titleTransformBefore;
+  const cardScaleAfter = await packageCard.evaluate((element) => getComputedStyle(element).scale);
+  const packageCardHoverCorrect = viewport.name === 'desktop' ? cardScaleAfter !== cardScaleBefore : cardScaleAfter === cardScaleBefore;
   await page.screenshot({ path: path.join(outputDir, `packages-${viewport.name}.png`), fullPage: false });
 
+  await visit(page, '/services');
+  await page.locator('.service-detail-list').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => [...document.querySelectorAll('.service-detail .service-logo img')]
+    .every((image) => image.complete && image.naturalWidth > 0));
+  const services = await page.evaluate(() => ({
+    logos: [...document.querySelectorAll('.service-detail .service-logo img')].map((image) => image.getAttribute('src')),
+    headingFont: getComputedStyle(document.querySelector('h1')).fontFamily,
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  }));
+  await page.screenshot({ path: path.join(outputDir, `services-${viewport.name}.png`), fullPage: false });
+
   const staticPages = {};
-  for (const pathname of ['/services', '/about', '/missing-page']) {
+  for (const pathname of ['/about', '/missing-page']) {
     await visit(page, pathname);
     staticPages[pathname] = await page.evaluate(() => ({
       heading: document.querySelector('h1')?.textContent.trim(),
@@ -138,9 +158,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, team, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
+    report.push({ viewport, home, homeServices, homePackages, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, selectedWork, packages, packageActions, packageTitleZooms, staticPages, team, portfolio, caseStudies, careerLinks, fields, errors });
+    report.push({ viewport, home, homeServices, homePackages, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, fields, errors });
   }
 
   await page.close();
@@ -154,16 +174,25 @@ if (report.some((item) => item.errors.length
   || !item.home.logoLoaded
   || item.home.navLinks !== navigationConfig.length
   || item.home.metricLabels.length !== 3
-  || item.selectedWork.cards !== selectedWorkConfig.length
-  || item.selectedWork.labels.some((label, index) => label !== selectedWorkConfig[index].label)
-  || item.selectedWork.stats.some((stat, index) => stat !== selectedWorkConfig[index].stat)
-  || item.selectedWork.horizontalOverflow
+  || !item.home.bodyFont.includes('Outfit')
+  || !item.home.headingFont.includes('Outfit')
+  || item.homeServices.logos.length !== servicesPageConfig.services.length
+  || item.homeServices.logos.some((logo, index) => logo !== servicesPageConfig.services[index].logo)
+  || item.homeServices.horizontalOverflow
+  || item.homePackages.cards !== packagesPageConfig.packages.length
+  || item.homePackages.actions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
+  || item.homePackages.horizontalOverflow
   || item.packages !== 3
   || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
-  || !item.packageTitleZooms
+  || !item.packageCardHoverCorrect
+  || item.services.logos.length !== servicesPageConfig.services.length
+  || item.services.logos.some((logo, index) => logo !== servicesPageConfig.services[index].logo)
+  || !item.services.headingFont.includes('Outfit')
+  || item.services.horizontalOverflow
   || Object.values(item.staticPages).some((page) => !page.heading || page.horizontalOverflow)
   || item.team.cards !== teamPageConfig.members.length
-  || item.team.handles.some((handle, index) => !handle.includes(teamPageConfig.members[index].discordUsername))
+  || item.team.handles.length !== teamPageConfig.members.length
+  || item.team.handles.some((handle) => !handle.startsWith('@') || !handle.endsWith(' on Discord'))
   || item.team.portraits !== teamPageConfig.members.length
   || item.team.brokenImages
   || item.team.horizontalOverflow

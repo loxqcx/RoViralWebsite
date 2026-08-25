@@ -9,6 +9,7 @@ export const servicesPageConfig = {
   services: [
     {
       id: '01',
+      logo: '/assets/01.png',
       title: 'Short Form Content Creation',
       shortTitle: 'Short form',
       description: 'Platform-native videos built around hooks, repeatable formats, and the moments players want to share.',
@@ -17,6 +18,7 @@ export const servicesPageConfig = {
     },
     {
       id: '02',
+      logo: '/assets/02.png',
       title: 'Content Creation Management',
       shortTitle: 'Content ops',
       description: 'A complete content pipeline, from creator briefs and calendars to approvals, publishing, and reporting.',
@@ -25,6 +27,7 @@ export const servicesPageConfig = {
     },
     {
       id: '03',
+      logo: '/assets/03.png',
       title: 'Community Management',
       shortTitle: 'Community',
       description: 'Human, fast, on-brand community care that turns players into regulars and regulars into advocates.',
@@ -33,6 +36,7 @@ export const servicesPageConfig = {
     },
     {
       id: '04',
+      logo: '/assets/04.png',
       title: 'PTR Boosting',
       shortTitle: 'PTR growth',
       description: 'Thumbnail and icon testing that improves the first impression your game makes on discovery surfaces.',
@@ -41,6 +45,7 @@ export const servicesPageConfig = {
     },
     {
       id: '05',
+      logo: '/assets/05.png',
       title: 'Roblox Game Growth Audit',
       shortTitle: 'Growth audit',
       description: 'A clear diagnostic of your acquisition funnel, positioning, content, community, and growth blockers.',
@@ -49,6 +54,7 @@ export const servicesPageConfig = {
     },
     {
       id: '06',
+      logo: '/assets/06.png',
       title: 'Game Trailers',
       shortTitle: 'Trailers',
       description: 'Launch trailers and update teasers paced for attention, clarity, and the exact promise of your game.',

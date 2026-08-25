@@ -15,11 +15,12 @@ export const homePageConfig = {
     title: ['One team. Every', 'attention lever.'],
     body: 'We connect the parts that usually get scattered across freelancers, creators, and community teams.',
   },
-  selectedWorkSection: {
-    eyebrow: 'Selected work',
-    title: ['Built for the', 'scroll and the server.'],
-    buttonLabel: 'View all work',
-    buttonPath: '/portfolio',
+  packagesSection: {
+    eyebrow: 'Packages',
+    title: ['Choose your pace.', 'Keep the momentum.'],
+    body: 'Three flexible starting points for launches, ongoing growth, and teams that need a complete attention engine.',
+    buttonLabel: 'Explore packages',
+    buttonPath: '/packages',
   },
   processSection: {
     eyebrow: 'How we work',

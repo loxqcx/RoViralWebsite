@@ -2,6 +2,7 @@
 import { ArrowUpRight, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PageHero from '../components/PageHero';
+import ServiceLogo from '../components/ServiceLogo';
 import { servicesPageConfig } from '../config/services';
 
 export default function ServicesPage() {
@@ -12,7 +13,7 @@ export default function ServicesPage() {
         <div className="container service-detail-list">
           {servicesPageConfig.services.map((service) => (
             <article className={`service-detail accent-${service.accent}`} key={service.id}>
-              <div className="service-detail-number">{service.id}</div>
+              <ServiceLogo service={service} variant="detail" />
               <div className="service-detail-main">
                 <span>{service.shortTitle}</span>
                 <h2>{service.title}</h2>

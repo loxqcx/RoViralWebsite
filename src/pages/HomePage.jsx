@@ -1,10 +1,11 @@
 // Made by loxqcx on Discord.
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ProjectCard from '../components/ProjectCard';
+import PackageCard from '../components/PackageCard';
 import SectionHeading from '../components/SectionHeading';
+import ServiceLogo from '../components/ServiceLogo';
 import { homePageConfig } from '../config/home';
-import { selectedWorkConfig } from '../config/selectedWork';
+import { packagesPageConfig } from '../config/packages';
 import { servicesPageConfig } from '../config/services';
 
 export default function HomePage() {
@@ -37,7 +38,7 @@ export default function HomePage() {
           <div className="service-strips">
             {servicesPageConfig.services.map((service) => (
               <Link to="/services" className="service-strip" key={service.id}>
-                <span>{service.id}</span>
+                <ServiceLogo service={service} variant="strip" />
                 <h3>{service.title}</h3>
                 <p>{service.description}</p>
                 <ArrowUpRight />
@@ -47,13 +48,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="selected-work section-pad">
+      <section className="home-packages packages-section section-pad">
         <div className="container">
-          <SectionHeading eyebrow={homePageConfig.selectedWorkSection.eyebrow} title={homePageConfig.selectedWorkSection.title} inverse />
-          <div className="project-grid">
-            {selectedWorkConfig.map((item, index) => <ProjectCard key={item.name} item={item} index={index} />)}
+          <SectionHeading {...homePageConfig.packagesSection} inverse />
+          <div className="package-grid home-package-grid">
+            {packagesPageConfig.packages.map((pkg, index) => <PackageCard pkg={pkg} index={index} key={pkg.name} />)}
           </div>
-          <Link className="button button--light work-button" to={homePageConfig.selectedWorkSection.buttonPath}>{homePageConfig.selectedWorkSection.buttonLabel} <ArrowUpRight size={18} /></Link>
+          <Link className="button button--light home-packages-button" to={homePageConfig.packagesSection.buttonPath}>{homePageConfig.packagesSection.buttonLabel} <ArrowUpRight size={18} /></Link>
         </div>
       </section>
 
