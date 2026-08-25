@@ -1,52 +1,13 @@
 // Made by loxqcx on Discord.
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Activity, ArrowUpRight, Eye, Gamepad2 } from 'lucide-react';
 import PageHero from '../components/PageHero';
 import { gamesConfig } from '../config/games';
 import { siteConfig } from '../config/site';
-
-const compactNumber = new Intl.NumberFormat('en-US', {
-  notation: 'compact',
-  maximumFractionDigits: 1,
-});
-
-const formatStat = (value, loaded) => loaded ? compactNumber.format(Number(value) || 0) : '--';
-
-function usePortfolioStats() {
-  const [state, setState] = useState({ status: 'loading', games: [], totals: null, updatedAt: null });
-  const placeIds = useMemo(() => gamesConfig.games.map((game) => game.placeId).join(','), []);
-
-  useEffect(() => {
-    let active = true;
-    let controller;
-
-    const load = async () => {
-      controller?.abort();
-      controller = new AbortController();
-      try {
-        const response = await fetch(`/api/roblox-stats?placeIds=${encodeURIComponent(placeIds)}`, { signal: controller.signal });
-        if (!response.ok) throw new Error('Stats request failed.');
-        const data = await response.json();
-        if (active) setState({ status: 'live', games: data.games || [], totals: data.totals || null, updatedAt: data.updatedAt || null });
-      } catch (error) {
-        if (active && error.name !== 'AbortError') setState((current) => ({ ...current, status: 'error' }));
-      }
-    };
-
-    load();
-    const timer = window.setInterval(load, gamesConfig.refreshMs);
-    return () => {
-      active = false;
-      controller?.abort();
-      window.clearInterval(timer);
-    };
-  }, [placeIds]);
-
-  return state;
-}
+import { formatGameStat, useGameStats } from '../hooks/useGameStats';
 
 export default function PortfolioPage() {
-  const live = usePortfolioStats();
+  const live = useGameStats(gamesConfig.games, gamesConfig.refreshMs);
   const loaded = live.status === 'live';
   const statsByPlace = useMemo(() => new Map(live.games.map((game) => [String(game.placeId), game])), [live.games]);
   const games = useMemo(() => {
@@ -80,8 +41,8 @@ export default function PortfolioPage() {
           </div>
 
           <div className="portfolio-totals">
-            <div><Activity size={19} /><strong>{formatStat(live.totals?.playing, loaded)}</strong><span>Playing now</span></div>
-            <div><Eye size={19} /><strong>{formatStat(live.totals?.visits, loaded)}</strong><span>Total visits</span></div>
+            <div><Activity size={19} /><strong>{formatGameStat(live.totals?.playing, loaded)}</strong><span>Playing now</span></div>
+            <div><Eye size={19} /><strong>{formatGameStat(live.totals?.visits, loaded)}</strong><span>Total visits</span></div>
             <div><Gamepad2 size={19} /><strong>{gamesConfig.games.length}</strong><span>Games tracked</span></div>
           </div>
 
@@ -99,7 +60,7 @@ export default function PortfolioPage() {
                     }}
                   />
                   {game.badge && <span className="game-badge">{game.badge}</span>}
-                  <span className="game-live-chip"><i /> {formatStat(game.stats?.playing, loaded)} live</span>
+                  <span className="game-live-chip"><i /> {formatGameStat(game.stats?.playing, loaded)} live</span>
                 </a>
                 <div className="live-game-body">
                   <div className="live-game-heading">
@@ -108,8 +69,8 @@ export default function PortfolioPage() {
                   </div>
                   <p>{game.description}</p>
                   <div className="live-game-footer">
-                    <div className="game-stat"><strong>{formatStat(game.stats?.playing, loaded)}</strong><span>Live CCU</span></div>
-                    <div className="game-stat"><strong>{formatStat(game.stats?.visits, loaded)}</strong><span>Visits</span></div>
+                    <div className="game-stat"><strong>{formatGameStat(game.stats?.playing, loaded)}</strong><span>Live CCU</span></div>
+                    <div className="game-stat"><strong>{formatGameStat(game.stats?.visits, loaded)}</strong><span>Visits</span></div>
                     <a className="game-play-link" href={game.robloxUrl} target="_blank" rel="noreferrer" aria-label={`Play ${game.name} on Roblox`} title="Open on Roblox">
                       <ArrowUpRight size={22} />
                     </a>

@@ -5,7 +5,7 @@ export const navigationConfig = [
   { label: 'Work', path: '/portfolio' },
   { label: 'Packages', path: '/packages' },
   { label: 'About', path: '/about' },
-  { label: 'Careers', path: '/careers', menuOnly: true },
-  { label: 'Our team', path: '/team', menuOnly: true },
-  { label: 'Case studies', path: '/case-studies', menuOnly: true },
+  { label: 'Case studies', path: '/case-studies' },
+  { label: 'Our team', path: '/team' },
+  { label: 'Careers', path: '/careers' },
 ];
