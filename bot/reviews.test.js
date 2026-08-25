@@ -1,6 +1,6 @@
 // Made by loxqcx on Discord.
 import { describe, expect, it, vi } from 'vitest';
-import { buildModeratedEmbed, deleteAllReviews, findReviewMessage, handleReviewReaction, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
+import { buildModeratedEmbed, findReviewMessage, handleReviewReaction, markAllReviewsDeleted, migrateLegacyReviewIds, syncPendingReviewReactions } from './reviews.js';
 
 describe('review moderation', () => {
   const pending = {
@@ -55,15 +55,19 @@ describe('review moderation', () => {
     await expect(findReviewMessage(channel, 'OTHER-ID')).resolves.toBe(pending);
   });
 
-  it('deletes review embeds without deleting unrelated messages', async () => {
-    const remove = vi.fn();
-    const unrelatedRemove = vi.fn();
-    const review = { id: 'review', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | declined | review3' } }], delete: remove };
-    const unrelated = { id: 'unrelated', author: { id: 'bot-id' }, embeds: [], delete: unrelatedRemove };
+  it('marks review embeds deleted without editing unrelated messages', async () => {
+    const edit = vi.fn();
+    const unrelatedEdit = vi.fn();
+    const review = { id: 'review', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | declined | review3' }, fields: [{ name: 'Review ID', value: 'review3' }] }], edit };
+    const unrelated = { id: 'unrelated', author: { id: 'bot-id' }, embeds: [], edit: unrelatedEdit };
     const channel = { messages: { fetch: vi.fn().mockResolvedValue(new Map([[review.id, review], [unrelated.id, unrelated]])) } };
-    await expect(deleteAllReviews(channel, 'bot-id')).resolves.toBe(1);
-    expect(remove).toHaveBeenCalledOnce();
-    expect(unrelatedRemove).not.toHaveBeenCalled();
+    await expect(markAllReviewsDeleted(channel, 'bot-id')).resolves.toBe(1);
+    expect(edit.mock.calls[0][0].embeds[0]).toMatchObject({
+      title: 'Deleted',
+      description: 'This review has been deleted.',
+      footer: { text: 'RoViral Review | deleted | review3' },
+    });
+    expect(unrelatedEdit).not.toHaveBeenCalled();
   });
 
   it('restores both reactions on pending reviews at startup', async () => {

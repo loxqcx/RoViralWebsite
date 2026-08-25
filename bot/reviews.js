@@ -125,7 +125,7 @@ export async function deleteReviewById(channel, reviewId, botUserId) {
   return true;
 }
 
-export async function deleteAllReviews(channel, botUserId, scanLimit = reviewsConfig.moderation.deleteCommand.scanLimit) {
+export async function markAllReviewsDeleted(channel, botUserId, scanLimit = reviewsConfig.moderation.deleteCommand.scanLimit) {
   let before;
   let scanned = 0;
   let deleted = 0;
@@ -133,13 +133,24 @@ export async function deleteAllReviews(channel, botUserId, scanLimit = reviewsCo
   while (scanned < scanLimit) {
     const batch = await channel.messages.fetch({ limit: Math.min(100, scanLimit - scanned), ...(before ? { before } : {}) });
     const messages = [...batch.values()];
-    const reviews = messages.filter((message) => {
+    const reviews = messages.map((message) => {
       if (message.author?.id !== botUserId) return false;
       const embed = message.embeds[0]?.toJSON?.() || message.embeds[0];
-      return Boolean(readReviewState(embed));
-    });
+      const marker = readReviewState(embed);
+      return marker ? { message, embed, marker } : null;
+    }).filter(Boolean);
     for (const review of reviews) {
-      await review.delete();
+      const identityFields = (review.embed.fields || []).filter((item) => [REVIEW_ID_FIELD, LEGACY_REVIEW_ID_FIELD].includes(item.name));
+      await review.message.edit({
+        embeds: [{
+          title: reviewsConfig.moderation.deleteAllCommand.deletedTitle,
+          description: reviewsConfig.moderation.deleteAllCommand.deletedBody,
+          color: reviewsConfig.moderation.colors.deleted,
+          fields: identityFields,
+          footer: { text: `${reviewsConfig.moderation.footerPrefix} | deleted | ${review.marker.id}` },
+          timestamp: new Date().toISOString(),
+        }],
+      });
       deleted += 1;
     }
     if (messages.length < 100) break;

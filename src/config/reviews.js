@@ -36,6 +36,7 @@ export const reviewsConfig = {
       approved: 0x20ef55,
       denied: 0xe05252,
       declined: 0xe05252,
+      deleted: 0x6f7b72,
     },
     approvedMessage: 'Review approved',
     declinedMessage: 'Review declined',
@@ -51,9 +52,10 @@ export const reviewsConfig = {
     },
     deleteAllCommand: {
       name: 'deleteallrev',
-      description: 'Delete every review submission and remove them from the website.',
-      successMessage: 'Deleted {count} review(s). The website will update on its next refresh.',
-      emptyMessage: 'There are no reviews to delete.',
+      description: 'Mark every review deleted and remove them from the website.',
+      successMessage: 'All reviews have been deleted',
+      deletedTitle: 'Deleted',
+      deletedBody: 'This review has been deleted.',
     },
   },
 };

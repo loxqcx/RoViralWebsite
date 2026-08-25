@@ -87,31 +87,33 @@ describe('Discord commands', () => {
   });
 
   it('deletes all review records', async () => {
-    const firstDelete = vi.fn();
-    const secondDelete = vi.fn();
+    const firstEdit = vi.fn();
+    const secondEdit = vi.fn();
     const channel = {
       messages: {
         fetch: vi.fn().mockResolvedValue(new Map([
-          ['first', { id: 'first', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | approved | review1' } }], delete: firstDelete }],
-          ['second', { id: 'second', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | pending | review2' } }], delete: secondDelete }],
+          ['first', { id: 'first', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | approved | review1' }, fields: [{ name: 'Review ID', value: 'review1' }] }], edit: firstEdit }],
+          ['second', { id: 'second', author: { id: 'bot-id' }, embeds: [{ footer: { text: 'RoViral Review | pending | review2' }, fields: [{ name: 'Review ID', value: 'review2' }] }], edit: secondEdit }],
         ])),
       },
     };
     const editReply = vi.fn();
+    const deferReply = vi.fn();
     await handleCommand({
       isChatInputCommand: () => true,
       commandName: 'deleteallrev',
       user: { id: 'staff-id' },
       memberPermissions: { has: () => true },
-      deferReply: vi.fn(),
+      deferReply,
       editReply,
       client: {
         user: { id: 'bot-id' },
         channels: { fetch: vi.fn().mockResolvedValue(channel) },
       },
     });
-    expect(firstDelete).toHaveBeenCalledOnce();
-    expect(secondDelete).toHaveBeenCalledOnce();
-    expect(editReply).toHaveBeenCalledWith('Deleted 2 review(s). The website will update on its next refresh.');
+    expect(firstEdit.mock.calls[0][0].embeds[0].title).toBe('Deleted');
+    expect(secondEdit.mock.calls[0][0].embeds[0].footer.text).toContain('| deleted | review2');
+    expect(deferReply).toHaveBeenCalledWith();
+    expect(editReply).toHaveBeenCalledWith('All reviews have been deleted');
   });
 });

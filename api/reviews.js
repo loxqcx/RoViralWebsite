@@ -4,7 +4,7 @@ import { reviewsConfig } from '../src/config/reviews.js';
 
 const API_ROOT = 'https://discord.com/api/v10';
 const escapedFooterPrefix = reviewsConfig.moderation.footerPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const FOOTER_PATTERN = new RegExp(`^${escapedFooterPrefix} \\| (pending|approved|denied|declined) \\| ([a-z0-9_-]+)$`, 'i');
+const FOOTER_PATTERN = new RegExp(`^${escapedFooterPrefix} \\| (pending|approved|denied|declined|deleted) \\| ([a-z0-9_-]+)$`, 'i');
 const FIELD_NAMES = {
   identity: 'Discord',
   userId: 'Discord User ID',

@@ -39,6 +39,8 @@ describe('review submissions', () => {
     expect(parseApprovedReview({ embeds: payload.embeds, timestamp: '2026-08-24T00:00:00.000Z' })).toMatchObject({
       id: 'review-id', displayName: 'Erik', username: 'loxqcx', stars: 4,
     });
+    payload.embeds[0].footer.text = 'RoViral Review | deleted | review-id';
+    expect(parseApprovedReview({ embeds: payload.embeds })).toBeNull();
   });
 
   it('posts the embed and both moderation reactions', async () => {
