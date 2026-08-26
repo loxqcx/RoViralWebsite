@@ -28,3 +28,5 @@ Real webhook URLs and bot tokens must never be added to source control or client
 Import this repository into Vercel, add the environment variables, and deploy. Redeploy after changing an environment variable.
 
 See [DISCORD_SETUP.md](DISCORD_SETUP.md) for team profile and bot presence setup.
+
+See [BOT_HOSTING.md](BOT_HOSTING.md) for a persistent free-tier VM deployment with automatic crash and reboot recovery.
