@@ -15,7 +15,10 @@ export default function ServicesPage() {
             <article className={`service-detail accent-${service.accent}`} key={service.id}>
               <ServiceLogo service={service} variant="detail" />
               <div className="service-detail-main">
-                <span>{service.shortTitle}</span>
+                <div className="service-detail-labels">
+                  <span>{service.shortTitle}</span>
+                  {service.status && <strong className="service-status">{service.status}</strong>}
+                </div>
                 <h2>{service.title}</h2>
                 <p>{service.description}</p>
               </div>

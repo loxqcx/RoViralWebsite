@@ -950,6 +950,10 @@ a {
 .accent-cyan { --accent: var(--cyan); }
 .accent-yellow { --accent: var(--yellow); }
 .service-detail-main > span { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; text-transform: uppercase; }
+.service-detail-labels { display: flex; align-items: center; flex-wrap: wrap; gap: 0.65rem; }
+.service-detail-labels > span { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; text-transform: uppercase; }
+.service-status { display: inline-flex; width: fit-content; padding: 0.28rem 0.45rem; border: 1px solid currentColor; border-radius: 4px; color: var(--lime); font-family: 'JetBrains Mono', monospace; font-size: 0.58rem; line-height: 1; text-transform: uppercase; }
+.service-strip h3 .service-status { margin-left: 0.7rem; vertical-align: middle; }
 .service-detail-main h2 { margin: 0.6rem 0 1rem; font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 3.5vw, 4rem); line-height: 0.95; }
 .service-detail-main p { max-width: 620px; margin: 0; color: var(--muted); }
 .service-detail ul, .package-card ul { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
@@ -1273,8 +1277,12 @@ a {
 .package-description { min-height: 84px; margin: 1.5rem 0; color: var(--muted); font-size: 0.86rem; }
 .package-card--featured .package-description { color: #b9bbb3; }
 .package-price { display: grid; margin-bottom: 2rem; padding-block: 1.4rem; border-block: 1px solid currentColor; }
+.package-price-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.35rem 0.55rem; }
 .package-price strong { font-family: 'Outfit', sans-serif; font-size: 2.5rem; line-height: 1; }
 .package-price span { margin-top: 0.3rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; text-transform: uppercase; }
+.package-price-row .package-currency,
+.package-price-row .package-price-gbp { margin-top: 0; }
+.package-price-row .package-price-gbp { margin-left: auto; font-size: 0.72rem; }
 .package-card--featured .package-price span { color: #b9bbb3; }
 .package-card ul { margin-bottom: 2rem; }
 .package-card li svg { color: var(--coral); }
@@ -2304,6 +2312,10 @@ body {
 
 .service-strip:hover h3,
 .service-strip:hover p {
+  color: var(--ink);
+}
+
+.service-strip:hover .service-status {
   color: var(--ink);
 }
 

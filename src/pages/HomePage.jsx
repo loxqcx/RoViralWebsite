@@ -41,7 +41,7 @@ export default function HomePage() {
             {servicesPageConfig.services.map((service) => (
               <Link to="/services" className="service-strip" key={service.id}>
                 <ServiceLogo service={service} variant="strip" />
-                <h3>{service.title}</h3>
+                <h3>{service.title}{service.status && <span className="service-status">{service.status}</span>}</h3>
                 <p>{service.description}</p>
                 <ArrowUpRight />
               </Link>

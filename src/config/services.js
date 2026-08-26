@@ -30,6 +30,7 @@ export const servicesPageConfig = {
       logo: '/assets/03.png',
       title: 'Community Management',
       shortTitle: 'Community',
+      status: 'Coming soon',
       description: 'Human, fast, on-brand community care that turns players into regulars and regulars into advocates.',
       deliverables: ['Discord operations', 'Event programming', 'Feedback reports', 'Moderation playbooks'],
       accent: 'cyan',

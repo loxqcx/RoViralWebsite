@@ -11,7 +11,14 @@ export default function PackageCard({ pkg, index }) {
       <p className="package-kicker">{brandConfig.name} / {pkg.category}</p>
       <h2>{pkg.name}</h2>
       <p className="package-description">{pkg.description}</p>
-      <div className="package-price"><strong>{pkg.price}</strong><span>{pkg.cadence}</span></div>
+      <div className="package-price">
+        <div className="package-price-row">
+          <strong>{pkg.price}</strong>
+          <span className="package-currency">USD</span>
+          <span className="package-price-gbp">{pkg.priceGbp} GBP</span>
+        </div>
+        <span className="package-price-cadence">{pkg.cadence}</span>
+      </div>
       <ul>
         {pkg.includes.map((item) => <li key={item}><Check size={16} />{item}</li>)}
       </ul>

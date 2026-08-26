@@ -56,6 +56,7 @@ for (const viewport of [
     .every((image) => image.complete && image.naturalWidth > 0));
   const homeServices = await page.evaluate(() => ({
     logos: [...document.querySelectorAll('.service-strip .service-logo img')].map((image) => image.getAttribute('src')),
+    statuses: [...document.querySelectorAll('.service-strip .service-status')].map((element) => element.textContent.trim()),
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
   }));
   await page.screenshot({ path: path.join(outputDir, `home-services-${viewport.name}.png`), fullPage: false });
@@ -117,6 +118,10 @@ for (const viewport of [
   await visit(page, '/packages');
   const packages = await page.locator('.package-card').count();
   const packageActions = await page.locator('.package-card .button').evaluateAll((links) => links.map((link) => ({ href: link.href, text: link.textContent.trim() })));
+  const packageCurrencies = await page.evaluate(() => ({
+    usd: document.querySelectorAll('.package-card .package-currency').length,
+    gbp: document.querySelectorAll('.package-card .package-price-gbp').length,
+  }));
   const packageCards = page.locator('.package-card');
   const packageCard = packageCards.first();
   const cardRectBefore = await packageCard.evaluate((element) => {
@@ -155,6 +160,7 @@ for (const viewport of [
     .every((image) => image.complete && image.naturalWidth > 0));
   const services = await page.evaluate(() => ({
     logos: [...document.querySelectorAll('.service-detail .service-logo img')].map((image) => image.getAttribute('src')),
+    statuses: [...document.querySelectorAll('.service-detail .service-status')].map((element) => element.textContent.trim()),
     headingFont: getComputedStyle(document.querySelector('h1')).fontFamily,
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
   }));
@@ -235,9 +241,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, menuVisible, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCurrencies, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCurrencies, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, errors });
   }
 
   await page.close();
@@ -255,6 +261,7 @@ if (report.some((item) => item.errors.length
   || !item.home.headingFont.includes('Outfit')
   || item.homeServices.logos.length !== servicesPageConfig.services.length
   || item.homeServices.logos.some((logo, index) => logo !== servicesPageConfig.services[index].logo)
+  || item.homeServices.statuses.join('|') !== servicesPageConfig.services.filter((service) => service.status).map((service) => service.status).join('|')
   || item.homeServices.horizontalOverflow
   || item.homePackages.cards !== packagesPageConfig.packages.length
   || item.homePackages.actions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
@@ -276,6 +283,8 @@ if (report.some((item) => item.errors.length
   || item.reviewMarquee.horizontalOverflow
   || item.packages !== packagesPageConfig.packages.length
   || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
+  || item.packageCurrencies.usd !== packagesPageConfig.packages.length
+  || item.packageCurrencies.gbp !== packagesPageConfig.packages.length
   || !item.packageCardHoverCorrect
   || item.customPackage.href !== packagesPageConfig.note.linkUrl
   || item.customPackage.icon !== packagesPageConfig.note.icon
@@ -283,6 +292,7 @@ if (report.some((item) => item.errors.length
   || item.customPackage.horizontalOverflow
   || item.services.logos.length !== servicesPageConfig.services.length
   || item.services.logos.some((logo, index) => logo !== servicesPageConfig.services[index].logo)
+  || item.services.statuses.join('|') !== servicesPageConfig.services.filter((service) => service.status).map((service) => service.status).join('|')
   || !item.services.headingFont.includes('Outfit')
   || item.services.horizontalOverflow
   || Object.values(item.staticPages).some((page) => !page.heading || page.horizontalOverflow)
