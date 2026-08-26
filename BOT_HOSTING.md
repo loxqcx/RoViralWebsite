@@ -1,14 +1,40 @@
 # Keep The Discord Bot Online
 
-No host can guarantee zero downtime forever. The practical target is one persistent VM plus automatic restart after application crashes, network interruptions, and machine reboots.
+Code cannot keep running after the computer hosting it is turned off. A remote host must run the bot process. Free hosts can change their plans or have maintenance, so no provider can guarantee literal zero downtime forever.
 
-## Recommended Reliable Option
+## Free Hosting
 
-Use one Google Cloud Compute Engine `e2-micro` VM in `us-west1`, `us-central1`, or `us-east1`. Select an Ubuntu image, a non-preemptible standard VM, and no more than 30 GB of standard persistent disk to remain inside the eligible compute and disk free-tier limits. Google requires a billing account, and free-tier limits can change.
+Nylix Host currently offers one free, continuously running bot server with no card, no trial timer, no idle sleep, and automatic crash restarts. Request a Node.js server from the Nylix Host Discord, then open the supplied hosting panel.
 
-Google currently bills a normal external IPv4 address separately at `$0.005` per hour after trial credits, or roughly `$3.60` for a 30-day month. No free host can guarantee that a continuously connected Discord bot will stay online forever. This VM setup favors reliability and automatic recovery over an inaccurate zero-cost promise.
+Publish the latest repository first. In the hosting panel, import or clone:
 
-Do not use Vercel or a sleeping free web service for the bot process. Vercel continues hosting the website and API routes; the VM hosts only `bot/online.js`.
+```text
+https://github.com/loxqcx/RoViralWebsite.git
+```
+
+Use these process settings:
+
+```text
+Install command: npm ci --omit=dev
+Startup command: npm start
+Node.js version: 20 or newer
+```
+
+Add these values in the panel's private environment-variable section, not in an uploaded file:
+
+```text
+DISCORD_BOT_TOKEN=<real private token>
+DISCORD_BOT_ACTIVITY=RoViral Marketing
+DISCORD_GUILD_ID=1540448310458974208
+DISCORD_REVIEW_CHANNEL_ID=1541656718214307860
+DISCORD_REVIEW_MODERATOR_IDS=
+```
+
+Start the server and check the console for the registered-command message followed by `is online`. Do not run a second copy on a computer or another host.
+
+## Private VM Alternative
+
+The repository also includes a Linux `systemd` installer for a private VM. Use this when you need infrastructure you control instead of a shared free host.
 
 ## First Deployment
 
