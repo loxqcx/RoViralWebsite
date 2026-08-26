@@ -28,4 +28,12 @@ describe('bot process lock', () => {
     writeFileSync(lockPath, String(process.pid));
     expect(acquireProcessLock(lockPath, process.pid + 1)).toBeNull();
   });
+
+  it('replaces a stale lock when a container reuses the same pid', () => {
+    const lockPath = makeLockPath();
+    writeFileSync(lockPath, String(process.pid));
+    const release = acquireProcessLock(lockPath, process.pid);
+    expect(release).toBeTypeOf('function');
+    release();
+  });
 });

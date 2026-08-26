@@ -24,7 +24,7 @@ export function acquireProcessLock(lockPath, pid = process.pid) {
     } catch (error) {
       if (error.code !== 'EEXIST') throw error;
       const existingPid = Number.parseInt(readFileSync(lockPath, 'utf8'), 10);
-      if (Number.isInteger(existingPid) && processIsRunning(existingPid)) return null;
+      if (Number.isInteger(existingPid) && existingPid !== pid && processIsRunning(existingPid)) return null;
       try { unlinkSync(lockPath); } catch { return null; }
     }
   }

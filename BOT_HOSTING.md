@@ -2,9 +2,11 @@
 
 Code cannot keep running after the computer hosting it is turned off. A remote host must run the bot process. Free hosts can change their plans or have maintenance, so no provider can guarantee literal zero downtime forever.
 
-## Free Hosting
+## Free Self-Service Hosting
 
-Nylix Host currently offers one free, continuously running bot server with no card, no trial timer, no idle sleep, and automatic crash restarts. Request a Node.js server from the Nylix Host Discord, then open the supplied hosting panel.
+Bot-Hosting.net currently offers one free, continuously running bot deployment with no card, automatic crash restarts, and Discord or GitHub sign-in. It does not require a support ticket. The free deployment must be renewed manually every four days.
+
+Sign in at `https://bot-hosting.net/login`, create a free Node.js deployment, and connect the repository below.
 
 Publish the latest repository first. In the hosting panel, import or clone:
 
