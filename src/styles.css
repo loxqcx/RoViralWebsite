@@ -1293,6 +1293,8 @@ a {
 
 .package-note span { font-weight: 800; }
 .package-note p { margin: 0; color: var(--muted); }
+.package-note-heading { display: flex; align-items: center; gap: 0.8rem; }
+.package-note-icon { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 8px; object-fit: cover; }
 
 .case-list { background: var(--ink); }
 
@@ -2365,8 +2367,14 @@ body {
   color: var(--muted);
 }
 
-.package-note .text-link,
-.package-note span,
+.package-note .text-link {
+  color: var(--lime);
+}
+
+.package-note span {
+  color: var(--paper);
+}
+
 .career-note,
 .career-note p {
   color: var(--ink);

@@ -8,7 +8,7 @@ export default function PackageCard({ pkg, index }) {
     <article className={`package-card ${pkg.featured ? 'package-card--featured' : ''}`}>
       {pkg.featured && <span className="package-badge">{packagesPageConfig.featuredLabel}</span>}
       <div className="package-index">0{index + 1}</div>
-      <p className="package-kicker">{brandConfig.name}</p>
+      <p className="package-kicker">{brandConfig.name} / {pkg.category}</p>
       <h2>{pkg.name}</h2>
       <p className="package-description">{pkg.description}</p>
       <div className="package-price"><strong>{pkg.price}</strong><span>{pkg.cadence}</span></div>

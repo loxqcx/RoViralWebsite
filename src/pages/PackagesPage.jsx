@@ -1,6 +1,5 @@
 // Made by loxqcx on Discord.
 import { ArrowUpRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import PackageCard from '../components/PackageCard';
 import PageHero from '../components/PageHero';
 import { packagesPageConfig } from '../config/packages';
@@ -16,9 +15,14 @@ export default function PackagesPage() {
           ))}
         </div>
         <div className="container package-note">
-          <span>{packagesPageConfig.note.title}</span>
+          <span className="package-note-heading">
+            <img className="package-note-icon" src={packagesPageConfig.note.icon} alt="Discord" />
+            {packagesPageConfig.note.title}
+          </span>
           <p>{packagesPageConfig.note.body}</p>
-          <Link className="text-link" to={packagesPageConfig.note.linkPath}>{packagesPageConfig.note.linkLabel} <ArrowUpRight size={17} /></Link>
+          <a className="text-link" href={packagesPageConfig.note.linkUrl} target="_blank" rel="noreferrer">
+            {packagesPageConfig.note.linkLabel} <ArrowUpRight size={17} />
+          </a>
         </div>
       </section>
     </>

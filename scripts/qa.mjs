@@ -132,6 +132,21 @@ for (const viewport of [
   const packageCardHoverCorrect = viewport.name === 'desktop'
     ? cardRectAfter.width > cardRectBefore.width && cardRectAfter.y < cardRectBefore.y
     : Math.abs(cardRectAfter.width - cardRectBefore.width) < 0.5 && Math.abs(cardRectAfter.height - cardRectBefore.height) < 0.5;
+  await page.locator('.package-note').scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => {
+    const image = document.querySelector('.package-note-icon');
+    return image?.complete && image.naturalWidth > 0;
+  });
+  const customPackage = await page.evaluate(() => {
+    const link = document.querySelector('.package-note .text-link');
+    const image = document.querySelector('.package-note-icon');
+    return {
+      href: link?.href,
+      icon: image?.getAttribute('src'),
+      iconLoaded: Boolean(image?.complete && image.naturalWidth > 0),
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
   await page.screenshot({ path: path.join(outputDir, `packages-${viewport.name}.png`), fullPage: false });
 
   await visit(page, '/services');
@@ -220,9 +235,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, menuVisible, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, errors });
   }
 
   await page.close();
@@ -259,9 +274,13 @@ if (report.some((item) => item.errors.length
   || item.reviewMarquee.animationName !== 'review-marquee'
   || item.reviewMarquee.filledStars !== 36
   || item.reviewMarquee.horizontalOverflow
-  || item.packages !== 3
+  || item.packages !== packagesPageConfig.packages.length
   || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
   || !item.packageCardHoverCorrect
+  || item.customPackage.href !== packagesPageConfig.note.linkUrl
+  || item.customPackage.icon !== packagesPageConfig.note.icon
+  || !item.customPackage.iconLoaded
+  || item.customPackage.horizontalOverflow
   || item.services.logos.length !== servicesPageConfig.services.length
   || item.services.logos.some((logo, index) => logo !== servicesPageConfig.services[index].logo)
   || !item.services.headingFont.includes('Outfit')
