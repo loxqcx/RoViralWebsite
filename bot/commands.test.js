@@ -65,6 +65,7 @@ describe('Discord commands', () => {
   it('updates homepage views from an abbreviated value', async () => {
     const send = vi.fn();
     const editReply = vi.fn();
+    const deferReply = vi.fn();
     const handled = await handleCommand({
       isChatInputCommand: () => true,
       commandName: 'homet',
@@ -72,7 +73,7 @@ describe('Discord commands', () => {
       user: { id: 'staff-id' },
       memberPermissions: { has: () => true },
       options: { getString: () => '1.5M' },
-      deferReply: vi.fn(),
+      deferReply,
       editReply,
       client: {
         user: { id: 'bot-id' },
@@ -84,6 +85,7 @@ describe('Discord commands', () => {
     expect(send.mock.calls[0][0].embeds[0].fields).toEqual(expect.arrayContaining([
       expect.objectContaining({ name: 'viewsGenerated', value: '1500000' }),
     ]));
+    expect(deferReply).toHaveBeenCalledWith();
     expect(editReply).toHaveBeenCalledWith('Views generated updated to 1.5M+.');
   });
 

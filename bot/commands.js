@@ -91,7 +91,7 @@ export async function handleCommand(interaction, options = {}) {
       return true;
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply();
     await updateHomeMetric(channel, homeMetricKey, value, interaction.client.user.id);
     const config = homeMetricsConfig.commands[homeMetricKey];
     await interaction.editReply(`${config.successLabel} updated to ${formatHomeMetricValue(value)}.`);
