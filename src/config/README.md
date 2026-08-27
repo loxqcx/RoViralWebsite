@@ -14,7 +14,9 @@ This folder is the main customization surface for the website.
 - `careers.js`: Careers page hero, open roles, icon paths, apply label, and closing note.
 - `contact.js`: Contact page copy, form options, status labels, and success message.
 - `notFound.js`: 404 page copy.
-- `games.js`: portfolio games, case-study visibility, place IDs, thumbnails, Roblox links, display order, and refresh behavior. Set `caseStudies` to `true` to include a game on the Case Studies page.
+- `games.js`: portfolio games, place IDs, thumbnails, Roblox links, display order, and refresh behavior.
+- `metrics.js`: homepage metric defaults, Discord command labels, refresh timing, and count animation speed.
+- `server.js`: Discord contact settings, the bot admin allowlist, and the homepage totals storage channel.
 - `metrics.js`: homepage values for views, clients, and average reviews.
 - `navigation.js`: header and mobile navigation links.
 - `selectedWork.js`: optional static Selected Work card data retained for future use; the homepage currently displays packages instead.

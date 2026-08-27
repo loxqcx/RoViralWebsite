@@ -26,7 +26,6 @@ export const reviewsConfig = {
   },
   moderation: {
     channelId: '1541656718214307860',
-    moderatorUserIds: [],
     approvalEmoji: '\u2705',
     denialEmoji: '\u274c',
     footerPrefix: 'RoViral Review',

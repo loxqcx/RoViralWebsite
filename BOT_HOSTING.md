@@ -29,7 +29,7 @@ DISCORD_BOT_TOKEN=<real private token>
 DISCORD_BOT_ACTIVITY=RoViral Marketing
 DISCORD_GUILD_ID=1540448310458974208
 DISCORD_REVIEW_CHANNEL_ID=1541656718214307860
-DISCORD_REVIEW_MODERATOR_IDS=
+DISCORD_BOT_ADMIN_IDS=1312135134165729394,860461244627419138,1338968623095615508,898661166727962626
 ```
 
 Start the server and check the console for the registered-command message followed by `is online`. Do not run a second copy on a computer or another host.

@@ -44,7 +44,14 @@ export default function PortfolioPage() {
           <div className="live-games-grid">
             {games.map((game, index) => (
               <article className="live-game-card" key={game.placeId}>
-                <a className="live-game-media" href={game.robloxUrl} target="_blank" rel="noreferrer" aria-label={`Open ${game.name} on Roblox`}>
+                <a
+                  className="live-game-media"
+                  href={game.robloxUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Open ${game.name} on Roblox`}
+                  style={{ backgroundImage: `url(${brandConfig.heroImage})` }}
+                >
                   <img
                     src={game.thumbnail}
                     alt={`${game.name} Roblox game thumbnail`}

@@ -3,7 +3,9 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fetchDiscordProfiles, parseDiscordUserIds } from './api/discord-users.js';
 import { createReview, listReviews } from './api/reviews.js';
+import { listHomeMetrics } from './api/home-metrics.js';
 import { reviewsConfig } from './src/config/reviews.js';
+import { homeMetricsConfig } from './src/config/metrics.js';
 import { fetchPortfolioStats, parsePlaceIds } from './api/roblox-stats.js';
 
 const localRobloxStats = {
@@ -94,7 +96,31 @@ const localReviews = (env) => ({
   },
 });
 
+const localHomeMetrics = (env) => ({
+  name: 'local-home-metrics',
+  configureServer(server) {
+    server.middlewares.use('/api/home-metrics', async (request, response) => {
+      response.setHeader('Content-Type', 'application/json');
+      try {
+        const result = request.method === 'GET'
+          ? await listHomeMetrics({
+            token: env.DISCORD_BOT_TOKEN,
+            channelId: env.DISCORD_HOME_STATS_CHANNEL_ID || homeMetricsConfig.discord.channelId,
+          })
+          : { status: 405, data: { error: 'Method not allowed.' } };
+        response.statusCode = result.status;
+        response.setHeader('Cache-Control', 'no-store');
+        response.end(JSON.stringify(result.data));
+      } catch (error) {
+        console.error('Local home metrics request failed.', error);
+        response.statusCode = 502;
+        response.end(JSON.stringify({ error: 'Homepage totals are temporarily unavailable.' }));
+      }
+    });
+  },
+});
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  return { plugins: [react(), localRobloxStats, localDiscordProfiles(env.DISCORD_BOT_TOKEN), localReviews(env)] };
+  return { plugins: [react(), localRobloxStats, localDiscordProfiles(env.DISCORD_BOT_TOKEN), localReviews(env), localHomeMetrics(env)] };
 });

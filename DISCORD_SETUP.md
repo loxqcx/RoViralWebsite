@@ -27,6 +27,7 @@ DISCORD_WEBHOOK_URL=your_private_contact_webhook
 DISCORD_MENTION_IDS=1338968623095615508,898661166727962626,860461244627419138
 DISCORD_GUILD_ID=your_discord_server_id
 DISCORD_REVIEW_CHANNEL_ID=1541656718214307860
+DISCORD_HOME_STATS_CHANNEL_ID=1542385047208857600
 ```
 
 Apply them to the environments you use and redeploy. Vercel uses `DISCORD_BOT_TOKEN` in server routes only. Keep the review channel private so only staff can see submissions and react to them.
@@ -60,11 +61,16 @@ DISCORD_BOT_TOKEN=your_private_bot_token
 DISCORD_BOT_ACTIVITY=RoViral Marketing
 DISCORD_GUILD_ID=your_discord_server_id
 DISCORD_REVIEW_CHANNEL_ID=1541656718214307860
-# Optional: comma-separated Discord user IDs allowed to approve or deny
-DISCORD_REVIEW_MODERATOR_IDS=
+DISCORD_HOME_STATS_CHANNEL_ID=1542385047208857600
+DISCORD_BOT_ADMIN_IDS=1312135134165729394,860461244627419138,1338968623095615508,898661166727962626
+DISCORD_BOT_ADMIN_IDS=1312135134165729394,860461244627419138,1338968623095615508,898661166727962626
 ```
 
 The worker displays the bot as Online with the activity `Watching RoViral Marketing`. Changing `DISCORD_BOT_ACTIVITY` changes that text. A host that sleeps or stops the worker will make the bot appear Offline.
+
+Use the same `DISCORD_HOME_STATS_CHANNEL_ID` on Vercel and the bot host. The bot stores the homepage totals in one embed in that private channel, and Vercel reads that embed without exposing the bot token. Run `/homet value:100K` to update Views generated or `/homec value:25` to update Total clients. Inputs support plain numbers plus `K`, `M`, `B`, and `T` abbreviations.
+
+All slash commands work in any channel, but only IDs listed in `botConfig.adminUserIds` in `src/config/server.js` can use them. Review approval and decline reactions use the same allowlist. You can edit that config array, or set `DISCORD_BOT_ADMIN_IDS` on the bot host to a comma-separated replacement list. Restart the bot after either change. A non-admin receives `You need to be an admin to use this command.` The channel `1542385047208857600` is only used to store the homepage totals embed.
 
 When the worker starts, it also registers `/test`. Running the command makes the bot reply `lox test successful`. `DISCORD_GUILD_ID` makes the command available immediately in that one server and is recommended. Without it, the command is registered globally instead. Restart or redeploy the worker after adding the review environment variables.
 
@@ -75,7 +81,7 @@ When the worker starts, it also registers `/test`. Running the command makes the
 3. The bot replies `Review approved` or `Review declined` after it records the decision.
 4. Approved reviews appear after the website's next automatic refresh, normally within 10 to 20 seconds.
 
-When `DISCORD_REVIEW_MODERATOR_IDS` is empty, anyone who can access the private channel can decide. Set it to comma-separated staff Discord user IDs to restrict decisions further. A Discord user ID can retrieve a global public profile even if the reviewer is outside your server. A username can only be matched to a member in your server; otherwise the site uses the submitted username and a fallback avatar.
+Only configured bot admins can approve or decline reviews. A Discord user ID can retrieve a global public profile even if the reviewer is outside your server. A username can only be matched to a member in your server; otherwise the site uses the submitted username and a fallback avatar.
 
 New review embeds use simple sequential IDs such as `review1`, `review2`, and `review3`. Use `/deleter id:review1` to mark one review as deleted. Use `/deleteallrev` to mark every bot-authored review embed as deleted. Both actions preserve the complete embed information, change its title to `Deleted`, turn it red, and remove it from the website without deleting any Discord messages. The bulk command publicly confirms `All reviews have been deleted`; `/deleter` still confirms privately. Older UUID review IDs remain compatible with `/deleter`. Both commands permit configured moderators, members with Manage Messages, or staff who can access the private review channel.
 

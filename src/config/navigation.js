@@ -6,7 +6,6 @@ export const navigationConfig = [
   { label: 'Reviews', path: '/#reviews', anchor: true },
   { label: 'Packages', path: '/packages' },
   { label: 'About', path: '/about' },
-  { label: 'Case studies', path: '/case-studies' },
   { label: 'Our team', path: '/team' },
   { label: 'Careers', path: '/careers' },
 ];

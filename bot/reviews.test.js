@@ -42,7 +42,7 @@ describe('review moderation', () => {
         channel: { messages: { fetch: vi.fn().mockResolvedValue(message) } },
       },
     };
-    const handled = await handleReviewReaction(reaction, { id: 'staff-id', bot: false }, { channelId: '123456789012345678' });
+    const handled = await handleReviewReaction(reaction, { id: 'staff-id', bot: false }, { channelId: '123456789012345678', adminUserIds: ['staff-id'] });
     expect(handled).toBe(true);
     expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| declined |');
     expect(reply).toHaveBeenCalledWith({ content: 'Review declined', allowedMentions: { parse: [] } });
@@ -117,7 +117,7 @@ describe('review moderation', () => {
       embeds: [{ footer: { text: 'RoViral Review | pending | offline-id' } }],
       reactions: {
         cache: new Map([
-          ['approve', { emoji: { name: '\u2705' }, count: 2, me: true }],
+          ['approve', { emoji: { name: '\u2705' }, count: 2, me: true, users: { fetch: vi.fn().mockResolvedValue(new Map([['staff-id', { id: 'staff-id', bot: false }]])) } }],
           ['decline', { emoji: { name: '\u274c' }, count: 1, me: true }],
         ]),
       },
@@ -133,9 +133,18 @@ describe('review moderation', () => {
         }),
       },
     };
-    await syncPendingReviewReactions(client, 'channel-id');
+    await syncPendingReviewReactions(client, 'channel-id', ['staff-id']);
     expect(edit.mock.calls[0][0].embeds[0].footer.text).toContain('| approved |');
     expect(reply).toHaveBeenCalledWith({ content: 'Review approved', allowedMentions: { parse: [] } });
+  });
+
+  it('ignores review decisions from non-admins', async () => {
+    const handled = await handleReviewReaction(
+      { partial: false },
+      { id: 'not-an-admin', bot: false },
+      { adminUserIds: ['staff-id'] },
+    );
+    expect(handled).toBe(false);
   });
 
   it('migrates legacy IDs to simple sequential IDs', async () => {

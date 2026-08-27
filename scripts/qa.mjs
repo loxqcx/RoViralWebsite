@@ -13,7 +13,6 @@ import { teamPageConfig } from '../src/config/team.js';
 const baseUrl = process.env.QA_BASE_URL || 'http://127.0.0.1:5173';
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const outputDir = path.resolve('tmp/qa');
-const expectedCaseStudies = gamesConfig.games.filter((game) => game.caseStudies === true).length;
 
 await mkdir(outputDir, { recursive: true });
 
@@ -36,7 +35,15 @@ for (const viewport of [
   });
   page.on('pageerror', (error) => errors.push(error.message));
 
+  const homeMetricsApiUrl = `${baseUrl}/api/home-metrics`;
+  await page.route(homeMetricsApiUrl, (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ metrics: { viewsGenerated: 125_000, totalClients: 42, averageReviews: 4.5 } }),
+  }));
+
   await visit(page);
+  await page.waitForTimeout(1_400);
   await page.screenshot({ path: path.join(outputDir, `home-${viewport.name}.png`), fullPage: false });
 
   const home = await page.evaluate(() => ({
@@ -46,7 +53,8 @@ for (const viewport of [
     navVisible: Boolean(document.querySelector('header')),
     navLinks: document.querySelectorAll('.desktop-nav a').length,
     logoLoaded: Boolean(document.querySelector('.brand-logo')?.complete && document.querySelector('.brand-logo')?.naturalWidth),
-    metricLabels: [...document.querySelectorAll('.hero-stats span')].map((element) => element.textContent),
+    metricLabels: [...document.querySelectorAll('.hero-stats > div > span')].map((element) => element.textContent),
+    metricValues: [...document.querySelectorAll('.hero-stats strong')].map((element) => element.textContent),
     bodyFont: getComputedStyle(document.body).fontFamily,
     headingFont: getComputedStyle(document.querySelector('h1')).fontFamily,
   }));
@@ -167,7 +175,7 @@ for (const viewport of [
   await page.screenshot({ path: path.join(outputDir, `services-${viewport.name}.png`), fullPage: false });
 
   const staticPages = {};
-  for (const pathname of ['/about', '/missing-page']) {
+  for (const pathname of ['/about', '/case-studies', '/missing-page']) {
     await visit(page, pathname);
     staticPages[pathname] = await page.evaluate(() => ({
       heading: document.querySelector('h1')?.textContent.trim(),
@@ -203,24 +211,6 @@ for (const viewport of [
   }));
   await page.screenshot({ path: path.join(outputDir, `portfolio-${viewport.name}.png`), fullPage: false });
 
-  await visit(page, '/case-studies');
-  if (expectedCaseStudies > 0) {
-    await page.locator('.live-status--live').waitFor({ state: 'visible', timeout: 20_000 });
-    await page.locator('.case-study-grid').scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => {
-      const image = document.querySelector('.case-study-media img');
-      return image?.complete && image.naturalWidth > 0;
-    });
-  }
-  const caseStudies = await page.evaluate(() => ({
-    cards: document.querySelectorAll('.live-case-study').length,
-    liveChips: document.querySelectorAll('.live-case-study .game-live-chip').length,
-    imageLoaded: [...document.querySelectorAll('.case-study-media img')]
-      .every((image) => image.complete && image.naturalWidth > 0),
-    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-  }));
-  await page.screenshot({ path: path.join(outputDir, `case-studies-${viewport.name}.png`), fullPage: false });
-
   await visit(page, '/careers');
   const careerLinks = await page.locator('.career-apply').evaluateAll((links) => links.map((link) => link.href));
   await page.locator('.careers-list').scrollIntoViewIfNeeded();
@@ -241,9 +231,9 @@ for (const viewport of [
     await visit(page);
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menuVisible = await page.locator('.mobile-menu').isVisible();
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCurrencies, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, menuVisible, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCurrencies, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, careerLinks, careers, fields, menuVisible, errors });
   } else {
-    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCurrencies, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, caseStudies, careerLinks, careers, fields, errors });
+    report.push({ viewport, home, homeServices, homePackages, reviews, reviewMarquee, packages, packageActions, packageCurrencies, packageCardHoverCorrect, customPackage, services, staticPages, team, portfolio, careerLinks, careers, fields, errors });
   }
 
   await page.close();
@@ -257,6 +247,7 @@ if (report.some((item) => item.errors.length
   || !item.home.logoLoaded
   || item.home.navLinks !== navigationConfig.length
   || item.home.metricLabels.length !== 3
+  || item.home.metricValues.join('|') !== '125K+|42|4.5/5'
   || !item.home.bodyFont.includes('Outfit')
   || !item.home.headingFont.includes('Outfit')
   || item.homeServices.logos.length !== servicesPageConfig.services.length
@@ -302,14 +293,10 @@ if (report.some((item) => item.errors.length
   || item.team.portraits !== teamPageConfig.members.length
   || item.team.brokenImages
   || item.team.horizontalOverflow
-  || item.portfolio.cards !== 1
-  || item.portfolio.liveChips !== 1
+  || item.portfolio.cards !== gamesConfig.games.length
+  || item.portfolio.liveChips !== gamesConfig.games.length
   || !item.portfolio.visibleImagesLoaded
   || item.portfolio.horizontalOverflow
-  || item.caseStudies.cards !== expectedCaseStudies
-  || item.caseStudies.liveChips !== expectedCaseStudies
-  || !item.caseStudies.imageLoaded
-  || item.caseStudies.horizontalOverflow
   || item.careerLinks.length !== 3
   || item.careerLinks.some((url) => url !== brandConfig.discordUrl)
   || item.careers.icons.length !== careersPageConfig.roles.length

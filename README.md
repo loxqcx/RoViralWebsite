@@ -20,6 +20,7 @@ Vite serves the frontend and local API middleware. Copy `.env.example` to `.env.
 - Optionally set `DISCORD_MENTION_IDS` as comma-separated Discord IDs.
 - Add `DISCORD_BOT_TOKEN` to load Discord usernames and avatars on the team page.
 - Add `DISCORD_REVIEW_CHANNEL_ID` to send and load moderated reviews. The configured default is the RoViral review channel.
+- Add `DISCORD_HOME_STATS_CHANNEL_ID` to both Vercel and the bot host so `/homet` and `/homec` can update the homepage totals. Bot admin access is editable in `src/config/server.js` or with `DISCORD_BOT_ADMIN_IDS` on the bot host.
 
 Real webhook URLs and bot tokens must never be added to source control or client-side code.
 

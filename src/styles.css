@@ -763,7 +763,9 @@ a {
   aspect-ratio: 16 / 9;
   position: relative;
   overflow: hidden;
-  background: #101a12;
+  background-color: #101a12;
+  background-position: center;
+  background-size: cover;
   border: 1px solid #344138;
   border-radius: 8px;
 }

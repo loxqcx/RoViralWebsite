@@ -2,14 +2,18 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import PackageCard from '../components/PackageCard';
+import AnimatedMetric from '../components/AnimatedMetric';
 import ReviewsSection from '../components/ReviewsSection';
 import SectionHeading from '../components/SectionHeading';
 import ServiceLogo from '../components/ServiceLogo';
 import { homePageConfig } from '../config/home';
 import { packagesPageConfig } from '../config/packages';
 import { servicesPageConfig } from '../config/services';
+import { useHomeMetrics } from '../hooks/useHomeMetrics';
 
 export default function HomePage() {
+  const metricValues = useHomeMetrics();
+
   return (
     <>
       <section className="home-hero">
@@ -30,7 +34,12 @@ export default function HomePage() {
           </div>
         </div>
         <div className="container hero-stats">
-          {homePageConfig.hero.stats.map((stat) => <div key={stat.label}><strong>{stat.value}</strong><span>{stat.label}</span></div>)}
+          {homePageConfig.hero.stats.map((stat) => (
+            <div key={stat.key}>
+              <AnimatedMetric metric={stat} value={metricValues[stat.key]} />
+              <span>{stat.label}</span>
+            </div>
+          ))}
         </div>
       </section>
 

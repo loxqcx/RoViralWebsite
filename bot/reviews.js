@@ -1,6 +1,7 @@
 // Made by loxqcx on Discord.
 import { readReviewState } from '../api/reviews.js';
 import { reviewsConfig } from '../src/config/reviews.js';
+import { botConfig } from '../src/config/server.js';
 
 const decisionsInProgress = new Set();
 const REVIEW_ID_FIELD = 'Review ID';
@@ -71,10 +72,12 @@ async function applyReviewDecision(message, state, botUserId) {
   return true;
 }
 
-const hasNonBotReaction = (message, emoji) => {
+const hasAdminReaction = async (message, emoji, adminUserIds) => {
   const reactions = message.reactions?.cache ? [...message.reactions.cache.values()] : [];
   const reaction = reactions.find((item) => item.emoji.name === emoji);
-  return Boolean(reaction && reaction.count - (reaction.me ? 1 : 0) > 0);
+  if (!reaction || reaction.count - (reaction.me ? 1 : 0) <= 0) return false;
+  const users = await reaction.users.fetch();
+  return [...users.values()].some((user) => !user.bot && adminUserIds.includes(user.id));
 };
 
 export async function migrateLegacyReviewIds(client, channelId = reviewsConfig.moderation.channelId) {
@@ -113,7 +116,7 @@ export async function migrateLegacyReviewIds(client, channelId = reviewsConfig.m
   return migrated;
 }
 
-export async function syncPendingReviewReactions(client, channelId = reviewsConfig.moderation.channelId) {
+export async function syncPendingReviewReactions(client, channelId = reviewsConfig.moderation.channelId, adminUserIds = botConfig.adminUserIds) {
   const channel = await client.channels.fetch(channelId);
   if (!channel?.messages) return 0;
   const messages = await channel.messages.fetch({ limit: 100 });
@@ -123,8 +126,8 @@ export async function syncPendingReviewReactions(client, channelId = reviewsConf
     return readReviewState(embed)?.state === 'pending';
   });
   for (const message of pending) {
-    const approved = hasNonBotReaction(message, reviewsConfig.moderation.approvalEmoji);
-    const declined = hasNonBotReaction(message, reviewsConfig.moderation.denialEmoji);
+    const approved = await hasAdminReaction(message, reviewsConfig.moderation.approvalEmoji, adminUserIds);
+    const declined = await hasAdminReaction(message, reviewsConfig.moderation.denialEmoji, adminUserIds);
     if (approved !== declined) {
       await applyReviewDecision(message, approved ? 'approved' : 'declined', client.user.id);
     } else {
@@ -208,6 +211,8 @@ export async function markAllReviewsDeleted(channel, botUserId, scanLimit = revi
 
 export async function handleReviewReaction(reaction, user, options = {}) {
   if (user.bot) return false;
+  const adminUserIds = options.adminUserIds || botConfig.adminUserIds;
+  if (!adminUserIds.includes(user.id)) return false;
   if (reaction.partial) await reaction.fetch();
   if (reaction.message.partial) await reaction.message.fetch();
 
