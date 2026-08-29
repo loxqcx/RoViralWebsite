@@ -10,8 +10,7 @@ export const packagesPageConfig = {
     {
       name: 'Starter',
       category: 'Content',
-      price: '$544',
-      priceGbp: '£399',
+      price: '£399',
       cadence: 'per month',
       description: 'For developers looking to build a consistent content presence. Best for games looking to establish consistent short-form content.',
       featured: false,
@@ -31,8 +30,7 @@ export const packagesPageConfig = {
     {
       name: 'Growth',
       category: 'Content',
-      price: '$817',
-      priceGbp: '£599',
+      price: '£599',
       cadence: 'per month',
       description: 'For developers looking to scale their content and actively optimize based on performance. Best for games that already have content running and want to consistently improve its performance.',
       featured: true,
@@ -54,8 +52,7 @@ export const packagesPageConfig = {
     {
       name: 'Scale',
       category: 'Content',
-      price: '$1,363',
-      priceGbp: '£999',
+      price: '£999',
       cadence: 'per month',
       description: 'For studios that want RoViral to operate their short-form content strategy at scale. Best for studios that want a serious, data-driven short-form content operation.',
       featured: false,
@@ -80,8 +77,7 @@ export const packagesPageConfig = {
     {
       name: 'PTR Starter',
       category: 'PTR',
-      price: '$544',
-      priceGbp: '£399',
+      price: '£399',
       cadence: 'per month',
       description: 'For developers looking to establish PTR as a consistent source of player acquisition.',
       featured: false,
@@ -104,8 +100,7 @@ export const packagesPageConfig = {
     {
       name: 'PTR Growth',
       category: 'PTR',
-      price: '$1,227',
-      priceGbp: '£899',
+      price: '£899',
       cadence: 'per month',
       description: 'For studios that want PTR to become a major, high-volume part of their player acquisition strategy.',
       featured: false,
@@ -132,8 +127,7 @@ export const packagesPageConfig = {
     {
       name: 'Game Growth Audit',
       category: 'Game Growth',
-      price: '$408',
-      priceGbp: '£299',
+      price: '£299',
       cadence: 'one-time',
       description: 'A comprehensive Roblox game review that identifies what is limiting growth and provides a clear plan for improvement.',
       featured: false,

@@ -14,8 +14,7 @@ export default function PackageCard({ pkg, index }) {
       <div className="package-price">
         <div className="package-price-row">
           <strong>{pkg.price}</strong>
-          <span className="package-currency">USD</span>
-          <span className="package-price-gbp">{pkg.priceGbp} GBP</span>
+          <span className="package-currency">GBP</span>
         </div>
         <span className="package-price-cadence">{pkg.cadence}</span>
       </div>

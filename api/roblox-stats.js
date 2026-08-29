@@ -1,5 +1,6 @@
 // Made by loxqcx on Discord.
 const MAX_PLACE_IDS = 50;
+const THUMBNAIL_SIZE = '768x432';
 
 export function parsePlaceIds(value) {
   const raw = Array.isArray(value) ? value.join(',') : String(value || '');
@@ -22,11 +23,35 @@ export async function fetchPortfolioStats(placeIds, fetchImpl = fetch) {
   const universeIds = universeLookups.map(({ universeId }) => universeId).filter(Boolean);
 
   let gamesByUniverse = new Map();
+  let thumbnailsByUniverse = new Map();
   if (universeIds.length) {
     const response = await fetchImpl(`https://games.roblox.com/v1/games?universeIds=${universeIds.join(',')}`);
     if (!response.ok) throw new Error('Roblox games API request failed.');
     const payload = await response.json();
     gamesByUniverse = new Map((payload.data || []).map((game) => [String(game.id), game]));
+
+    try {
+      const thumbnailParams = new URLSearchParams({
+        universeIds: universeIds.join(','),
+        countPerUniverse: '10',
+        defaults: 'true',
+        size: THUMBNAIL_SIZE,
+        format: 'Webp',
+        isCircular: 'false',
+      });
+      const thumbnailResponse = await fetchImpl(`https://thumbnails.roblox.com/v1/games/multiget/thumbnails?${thumbnailParams}`);
+      if (thumbnailResponse.ok) {
+        const thumbnailPayload = await thumbnailResponse.json();
+        thumbnailsByUniverse = new Map((thumbnailPayload.data || []).map((entry) => [
+          String(entry.universeId),
+          [...new Set((entry.thumbnails || [])
+            .filter((thumbnail) => thumbnail.state === 'Completed' && thumbnail.imageUrl)
+            .map((thumbnail) => thumbnail.imageUrl))],
+        ]));
+      }
+    } catch {
+      // Live stats remain available when Roblox's thumbnail service is unavailable.
+    }
   }
 
   const games = universeLookups.map(({ placeId, universeId }) => {
@@ -37,6 +62,7 @@ export async function fetchPortfolioStats(placeIds, fetchImpl = fetch) {
       name: game?.name || null,
       playing: Number(game?.playing) || 0,
       visits: Number(game?.visits) || 0,
+      thumbnailUrls: universeId ? thumbnailsByUniverse.get(universeId) || [] : [],
     };
   });
 

@@ -1288,9 +1288,7 @@ a {
 .package-price-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.35rem 0.55rem; }
 .package-price strong { font-family: 'Outfit', sans-serif; font-size: 2.5rem; line-height: 1; }
 .package-price span { margin-top: 0.3rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; text-transform: uppercase; }
-.package-price-row .package-currency,
-.package-price-row .package-price-gbp { margin-top: 0; }
-.package-price-row .package-price-gbp { margin-left: auto; font-size: 0.72rem; }
+.package-price-row .package-currency { margin-top: 0; }
 .package-card--featured .package-price span { color: #b9bbb3; }
 .package-card ul { margin-bottom: 2rem; }
 .package-card li svg { color: var(--coral); }

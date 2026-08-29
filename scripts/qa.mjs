@@ -77,6 +77,12 @@ for (const viewport of [
   }));
   await page.screenshot({ path: path.join(outputDir, `home-packages-${viewport.name}.png`), fullPage: false });
 
+  const reviewApiUrl = `${baseUrl}/api/reviews`;
+  await page.route(reviewApiUrl, (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ reviews: [] }),
+  }));
   await visit(page, '/#reviews');
   await page.waitForTimeout(900);
   await page.getByRole('button', { name: 'Leave a review' }).click();
@@ -98,7 +104,7 @@ for (const viewport of [
   });
   await page.screenshot({ path: path.join(outputDir, `reviews-${viewport.name}.png`), fullPage: false });
 
-  const reviewApiUrl = `${baseUrl}/api/reviews`;
+  await page.unroute(reviewApiUrl);
   await page.route(reviewApiUrl, (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -127,8 +133,8 @@ for (const viewport of [
   const packages = await page.locator('.package-card').count();
   const packageActions = await page.locator('.package-card .button').evaluateAll((links) => links.map((link) => ({ href: link.href, text: link.textContent.trim() })));
   const packageCurrencies = await page.evaluate(() => ({
-    usd: document.querySelectorAll('.package-card .package-currency').length,
-    gbp: document.querySelectorAll('.package-card .package-price-gbp').length,
+    labels: [...document.querySelectorAll('.package-card .package-currency')].map((element) => element.textContent.trim()),
+    prices: [...document.querySelectorAll('.package-card .package-price strong')].map((element) => element.textContent.trim()),
   }));
   const packageCards = page.locator('.package-card');
   const packageCard = packageCards.first();
@@ -194,6 +200,23 @@ for (const viewport of [
   }));
   await page.screenshot({ path: path.join(outputDir, `team-${viewport.name}.png`), fullPage: false });
 
+  const robloxStatsApiUrl = `${baseUrl}/api/roblox-stats?*`;
+  await page.route(robloxStatsApiUrl, (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      games: gamesConfig.games.map((game, index) => ({
+        placeId: game.placeId,
+        universeId: String(index + 1),
+        name: game.name,
+        playing: 100 - index,
+        visits: 1_000_000 + index,
+        thumbnailUrls: ['/assets/hero-thumbnail.png', '/assets/roviral-logo.png'],
+      })),
+      totals: { playing: 199, visits: 2_000_001, games: gamesConfig.games.length },
+      updatedAt: new Date().toISOString(),
+    }),
+  }));
   await visit(page, '/portfolio');
   await page.locator('.live-status--live').waitFor({ state: 'visible', timeout: 20_000 });
   await page.locator('.live-games-grid').scrollIntoViewIfNeeded();
@@ -207,8 +230,18 @@ for (const viewport of [
     visibleImagesLoaded: [...document.querySelectorAll('.live-game-media img')]
       .slice(0, 1)
       .every((image) => image.complete && image.naturalWidth > 0),
+    thumbnails: [...document.querySelectorAll('.live-game-media img')].map((image) => image.getAttribute('src')),
     horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
   }));
+  const firstThumbnail = portfolio.thumbnails[0];
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => document.fonts.ready);
+  await page.locator('.live-status--live').waitFor({ state: 'visible', timeout: 20_000 });
+  await page.waitForFunction(() => {
+    const image = document.querySelector('.live-game-media img');
+    return image?.complete && image.naturalWidth > 0;
+  });
+  portfolio.rotatesOnRefresh = await page.locator('.live-game-media img').first().getAttribute('src') !== firstThumbnail;
   await page.screenshot({ path: path.join(outputDir, `portfolio-${viewport.name}.png`), fullPage: false });
 
   await visit(page, '/careers');
@@ -274,8 +307,9 @@ if (report.some((item) => item.errors.length
   || item.reviewMarquee.horizontalOverflow
   || item.packages !== packagesPageConfig.packages.length
   || item.packageActions.some((action) => action.href !== brandConfig.discordUrl || action.text !== packagesPageConfig.inquiryLabel)
-  || item.packageCurrencies.usd !== packagesPageConfig.packages.length
-  || item.packageCurrencies.gbp !== packagesPageConfig.packages.length
+  || item.packageCurrencies.labels.length !== packagesPageConfig.packages.length
+  || item.packageCurrencies.labels.some((label) => label !== 'GBP')
+  || item.packageCurrencies.prices.some((price) => !price.startsWith('£'))
   || !item.packageCardHoverCorrect
   || item.customPackage.href !== packagesPageConfig.note.linkUrl
   || item.customPackage.icon !== packagesPageConfig.note.icon
@@ -296,6 +330,8 @@ if (report.some((item) => item.errors.length
   || item.portfolio.cards !== gamesConfig.games.length
   || item.portfolio.liveChips !== gamesConfig.games.length
   || !item.portfolio.visibleImagesLoaded
+  || !item.portfolio.rotatesOnRefresh
+  || item.portfolio.thumbnails.some((thumbnail) => !['/assets/hero-thumbnail.png', '/assets/roviral-logo.png'].includes(thumbnail))
   || item.portfolio.horizontalOverflow
   || item.careerLinks.length !== 3
   || item.careerLinks.some((url) => url !== brandConfig.discordUrl)

@@ -53,7 +53,7 @@ export default function PortfolioPage() {
                   style={{ backgroundImage: `url(${brandConfig.heroImage})` }}
                 >
                   <img
-                    src={game.thumbnail}
+                    src={game.stats?.thumbnail || brandConfig.heroImage}
                     alt={`${game.name} Roblox game thumbnail`}
                     loading={index < 2 ? 'eager' : 'lazy'}
                     onError={(event) => {

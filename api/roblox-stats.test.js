@@ -16,9 +16,25 @@ describe('Roblox portfolio stats', () => {
         { id: 9002, name: 'Two', playing: 8, visits: 800 },
       ] }],
     ]);
-    const fetchMock = async (url) => ({ ok: responses.has(url), json: async () => responses.get(url) });
+    const fetchMock = async (url) => {
+      if (url.startsWith('https://thumbnails.roblox.com/v1/games/multiget/thumbnails?')) {
+        return { ok: true, json: async () => ({ data: [
+          { universeId: 9001, thumbnails: [
+            { state: 'Completed', imageUrl: 'https://tr.rbxcdn.com/one.webp' },
+            { state: 'Pending', imageUrl: 'https://tr.rbxcdn.com/pending.webp' },
+          ] },
+          { universeId: 9002, thumbnails: [{ state: 'Completed', imageUrl: 'https://tr.rbxcdn.com/two.webp' }] },
+        ] }) };
+      }
+      return { ok: responses.has(url), json: async () => responses.get(url) };
+    };
     const result = await fetchPortfolioStats(['123', '456'], fetchMock);
-    expect(result.games[0]).toMatchObject({ placeId: '123', playing: 12, visits: 1200 });
+    expect(result.games[0]).toMatchObject({
+      placeId: '123',
+      playing: 12,
+      visits: 1200,
+      thumbnailUrls: ['https://tr.rbxcdn.com/one.webp'],
+    });
     expect(result.totals).toEqual({ playing: 20, visits: 2000, games: 2 });
   });
 });
